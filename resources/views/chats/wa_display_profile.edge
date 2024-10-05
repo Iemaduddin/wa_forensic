@@ -1,0 +1,81 @@
+@layout('layouts/master')
+@set('title', 'Display Profile')
+@section('css')
+<link href="/libs/datatables.net-bs4/datatables.net-bs4.min.css" rel="stylesheet" type="text/css" />
+<link href="/libs/datatables.net-buttons-bs4/datatables.net-buttons-bs4.min.css" rel="stylesheet" type="text/css" />
+<link href="/libs/datatables.net-responsive-bs4/datatables.net-responsive-bs4.min.css" rel="stylesheet"
+    type="text/css" />
+<link href="/libs/sweetalert2/sweetalert2.min.css" rel="stylesheet ">
+@end
+@section('content')
+@!component('components/breadcrumb',{
+title: 'Display Profiles Management',
+li_1: 'Page'})
+
+
+<div class="card p-4">
+    <table class="table dt-responsive  w-100" id="wa_display_profile_table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Display Name</th>
+                <th>Number</th>
+                <th>Email</th>
+                <th>Address</th>
+                <th>Business Description</th>
+                <th>Websites</th>
+                <th>WA Type</th>
+            </tr>
+        </thead>
+
+    </table>
+</div>
+@end
+@section('script')
+<script src="/libs/datatables.net/datatables.net.min.js"></script>
+<script src="/libs/datatables.net-bs4/datatables.net-bs4.min.js"></script>
+<script src="/libs/datatables.net-buttons/datatables.net-buttons.min.js"></script>
+<script src="/libs/datatables.net-buttons-bs4/datatables.net-buttons-bs4.min.js"></script>
+<script src="/libs/jszip/jszip.min.js"></script>
+<script src="/libs/pdfmake/pdfmake.min.js"></script>
+<script src="/libs/datatables.net-responsive/datatables.net-responsive.min.js"></script>
+<script src="/libs/datatables.net-responsive-bs4/datatables.net-responsive-bs4.min.js">
+</script>
+<script src="/js/pages/datatables.init.js"></script>
+<script src="/libs/sweetalert2/sweetalert2.min.js"></script>
+<script src="/js/app.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#wa_display_profile_table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{{ route('chats.data_display_profile') }}',
+                type: 'POST',
+                data: function (d) {
+                    d._csrf = '{{ csrfToken }}'; // CSRF token
+                }
+            },
+            columns: [
+                { data: null, searchable: false, orderable: false }, // Index
+                { data: 'display_name' },
+                { data: 'number' },
+                { data: 'email' },
+                { data: 'address' },
+                { data: 'business_description' },
+                { data: 'websites' },
+                { data: 'wa_type' },
+            ],
+            order: [[1, 'asc']],
+            columnDefs: [
+                {
+                    targets: 0,
+                    render: function (data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    }
+                }
+            ]
+        });
+    });
+</script>
+@end

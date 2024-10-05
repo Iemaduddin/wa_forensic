@@ -1,0 +1,62 @@
+<!-- ========== Left Sidebar Start ========== -->
+<div class="vertical-menu">
+
+    <div data-simplebar class="h-100">
+
+        <!--- Sidemenu -->
+        <div id="sidebar-menu">
+
+            <!-- Left Menu Start -->
+            <ul class="metismenu list-unstyled" id="side-menu">
+                <li class="menu-title" data-key="t-menu">Menu</li>
+                <li>
+                    <a href="{{route('UsersController.index')}}">
+                        <i data-feather="user"></i>
+                        <span>Users Management</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow">
+                        <i data-feather="message-circle"></i>
+                        <span>WA Forensic</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li>
+                            <a href="{{route('ChatsController.index')}} ">
+                                <span>Clean</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{route('ChatsController.display_profile')}} ">
+                                <span>Display Profile</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{route('ChatsController.contacts')}} ">
+                                <span>Contacts</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{route('ChatsController.call_logs')}} ">
+                                <span>Call Logs</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{route('ChatsController.group_profile')}} ">
+                                <span>Group Profile</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{route('ChatsController.media')}} ">
+                                <span>Media</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <!-- Sidebar -->
+    </div>
+</div>
+<!-- Left Sidebar End -->

@@ -1,0 +1,109 @@
+@layout('layouts/master')
+@set('title', 'WA Clean')
+@section('css')
+<link href="/libs/datatables.net-bs4/datatables.net-bs4.min.css" rel="stylesheet" type="text/css" />
+<link href="/libs/datatables.net-buttons-bs4/datatables.net-buttons-bs4.min.css" rel="stylesheet" type="text/css" />
+<link href="/libs/datatables.net-responsive-bs4/datatables.net-responsive-bs4.min.css" rel="stylesheet"
+    type="text/css" />
+<link href="/libs/sweetalert2/sweetalert2.min.css" rel="stylesheet ">
+@end
+@section('content')
+@!component('components/breadcrumb',{
+title: 'WA Clean Management',
+li_1: 'Page'})
+
+
+<div class="card p-4">
+    <table class="table dt-responsive  w-100" id="wa_clean_table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>A Name</th>
+                <th>A Number</th>
+                <th>A Social Link</th>
+                <th>B Name</th>
+                <th>B Number</th>
+                <th>B Social Link</th>
+                <th>Group Name</th>
+                <th>Chat Type</th>
+                <th>Direction</th>
+                <th>Content</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{-- @each((chat, index) in chats)
+            <tr>
+                <td>{{index+1}}</td>
+                <td>{{chat.date}}</td>
+                <td>{{chat.time}}</td>
+                <td>{{chat.a_name}}</td>
+                <td>{{chat.a_number}}</td>
+                <td>{{chat.a_social_link}}</td>
+                <td>{{chat.b_name}}</td>
+                <td>{{chat.b_number}}</td>
+                <td>{{chat.b_social_link}}</td>
+                <td>{{chat.group_name}}</td>
+                <td>{{chat.chat_type}}</td>
+                <td>{{chat.direction}}</td>
+                <td>{{chat.content}}</td>
+            </tr>
+            @endeach --}}
+        </tbody>
+    </table>
+</div>
+@end
+@section('script')
+<script src="/libs/datatables.net/datatables.net.min.js"></script>
+<script src="/libs/datatables.net-bs4/datatables.net-bs4.min.js"></script>
+<script src="/libs/datatables.net-buttons/datatables.net-buttons.min.js"></script>
+<script src="/libs/datatables.net-buttons-bs4/datatables.net-buttons-bs4.min.js"></script>
+<script src="/libs/jszip/jszip.min.js"></script>
+<script src="/libs/pdfmake/pdfmake.min.js"></script>
+<script src="/libs/datatables.net-responsive/datatables.net-responsive.min.js"></script>
+<script src="/libs/datatables.net-responsive-bs4/datatables.net-responsive-bs4.min.js">
+</script>
+<script src="/js/pages/datatables.init.js"></script>
+<script src="/libs/sweetalert2/sweetalert2.min.js"></script>
+<script src="/js/app.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#wa_clean_table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{{ route('chats.data_wa_clean') }}',
+                type: 'POST',
+                data: function (d) {
+                    d._csrf = '{{ csrfToken }}'; // CSRF token
+                }
+            },
+            columns: [
+                { data: null, searchable: false, orderable: false }, // Index
+                { data: 'date' },
+                { data: 'time' },
+                { data: 'a_name' },
+                { data: 'a_number' },
+                { data: 'a_social_link' },
+                { data: 'b_name' },
+                { data: 'b_number' },
+                { data: 'b_social_link' },
+                { data: 'group_name' },
+                { data: 'chat_type' },
+                { data: 'direction' },
+                { data: 'content' }
+            ],
+            order: [[1, 'asc']],
+            columnDefs: [
+                {
+                    targets: 0,
+                    render: function (data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    }
+                }
+            ]
+        });
+    });
+</script>
+@end

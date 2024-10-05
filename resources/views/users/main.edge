@@ -1,0 +1,67 @@
+@layout('layouts/master')
+@set('title', 'User')
+@section('css')
+<link href="/libs/datatables.net-bs4/datatables.net-bs4.min.css" rel="stylesheet" type="text/css" />
+<link href="/libs/datatables.net-buttons-bs4/datatables.net-buttons-bs4.min.css" rel="stylesheet" type="text/css" />
+<link href="/libs/datatables.net-responsive-bs4/datatables.net-responsive-bs4.min.css" rel="stylesheet"
+  type="text/css" />
+<link href="/libs/sweetalert2/sweetalert2.min.css" rel="stylesheet ">
+@end
+@section('content')
+@!component('components/breadcrumb',{
+title: 'Users Management',
+li_1: 'Page'})
+<button class="btn btn-success btn-md rounded fw-bold text-white mb-4" type="button" data-bs-toggle="modal"
+  data-bs-target="#tambahUser">
+  <i class="fas fa-plus"></i>&nbsp;&nbsp;&nbsp;Tambah Data
+</button>
+
+@include('users/modal/create_user')
+
+<div class="card p-4">
+  <table class="table dt-responsive  w-100" id="users_table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      @each((user, index) in users)
+      <tr>
+        <td>{{index+1}}</td>
+        <td>{{user.username}}</td>
+        <td>{{user.email}}</td>
+        <td>
+          <div class="btn-group" role="group" aria-label="Basic example">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+              data-bs-target="#updateDataUser-{{user.id}}">Update</button>
+            @include('users/modal/update_user')
+            <form action="{{route('users.delete', {id:user.id})}}" method="post">
+              {{ csrfField() }}
+              <button type="submit" class="btn btn-danger confirm-delete">Delete</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      @endeach
+    </tbody>
+  </table>
+</div>
+@end
+@section('script')
+<script src="/libs/datatables.net/datatables.net.min.js"></script>
+<script src="/libs/datatables.net-bs4/datatables.net-bs4.min.js"></script>
+<script src="/libs/datatables.net-buttons/datatables.net-buttons.min.js"></script>
+<script src="/libs/datatables.net-buttons-bs4/datatables.net-buttons-bs4.min.js"></script>
+<script src="/libs/jszip/jszip.min.js"></script>
+<script src="/libs/pdfmake/pdfmake.min.js"></script>
+<script src="/libs/datatables.net-responsive/datatables.net-responsive.min.js"></script>
+<script src="/libs/datatables.net-responsive-bs4/datatables.net-responsive-bs4.min.js">
+</script>
+<script src="/js/pages/datatables.init.js"></script>
+<script src="/libs/sweetalert2/sweetalert2.min.js"></script>
+<script src="/js/app.min.js"></script>
+@end

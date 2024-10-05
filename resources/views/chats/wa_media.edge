@@ -1,0 +1,86 @@
+@layout('layouts/master')
+@set('title', 'WA Media')
+@section('css')
+<link href="/libs/datatables.net-bs4/datatables.net-bs4.min.css" rel="stylesheet" type="text/css" />
+<link href="/libs/datatables.net-buttons-bs4/datatables.net-buttons-bs4.min.css" rel="stylesheet" type="text/css" />
+<link href="/libs/datatables.net-responsive-bs4/datatables.net-responsive-bs4.min.css" rel="stylesheet"
+    type="text/css" />
+<link href="/libs/sweetalert2/sweetalert2.min.css" rel="stylesheet ">
+@end
+@section('content')
+@!component('components/breadcrumb',{
+title: 'WA Media Management',
+li_1: 'Page'})
+
+
+<div class="card p-4">
+    <table class="table dt-responsive  w-100" id="wa_contacts_table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Number</th>
+                <th>File Path</th>
+                <th>Media Type</th>
+                <th>File Size</th>
+                <th>Media Name</th>
+                <th>Media Caption</th>
+                <th>Media Duration</th>
+
+            </tr>
+        </thead>
+
+    </table>
+</div>
+@end
+@section('script')
+<script src="/libs/datatables.net/datatables.net.min.js"></script>
+<script src="/libs/datatables.net-bs4/datatables.net-bs4.min.js"></script>
+<script src="/libs/datatables.net-buttons/datatables.net-buttons.min.js"></script>
+<script src="/libs/datatables.net-buttons-bs4/datatables.net-buttons-bs4.min.js"></script>
+<script src="/libs/jszip/jszip.min.js"></script>
+<script src="/libs/pdfmake/pdfmake.min.js"></script>
+<script src="/libs/datatables.net-responsive/datatables.net-responsive.min.js"></script>
+<script src="/libs/datatables.net-responsive-bs4/datatables.net-responsive-bs4.min.js">
+</script>
+<script src="/js/pages/datatables.init.js"></script>
+<script src="/libs/sweetalert2/sweetalert2.min.js"></script>
+<script src="/js/app.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#wa_contacts_table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{{ route('chats.data_media') }}',
+                type: 'POST',
+                data: function (d) {
+                    d._csrf = '{{ csrfToken }}'; // CSRF token
+                }
+            },
+            columns: [
+                { data: null, searchable: false, orderable: false }, // Index
+                { data: 'date' },
+                { data: 'time' },
+                { data: 'number' },
+                { data: 'file_path' },
+                { data: 'media_type' },
+                { data: 'file_size' },
+                { data: 'media_name' },
+                { data: 'media_caption' },
+                { data: 'media_duration' },
+            ],
+            order: [[1, 'asc']],
+            columnDefs: [
+                {
+                    targets: 0,
+                    render: function (data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    }
+                }
+            ]
+        });
+    });
+</script>
+@end
