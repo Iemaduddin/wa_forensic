@@ -1,7 +1,8 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import Database from "@ioc:Adonis/Lucid/Database"
-
+const fs = require('fs');
+const path = require('path');
 export default class ChatsController {
     public async index({ view }: HttpContextContract) {
         return view.render('wa_forensic/wa_clean')
@@ -44,7 +45,24 @@ export default class ChatsController {
     
         // Dapatkan data sesuai dengan pagination
         const data = await query.offset(start).limit(length);
-    
+        // Cek dan siapkan mediaPath
+        data.forEach(chat => {
+          const mediaPath = chat.media;
+          
+          const fullPath = mediaPath ? path.join(__dirname, '..', 'public/', mediaPath) : null;
+
+          // Cek apakah media ada di path
+          chat.exists = fullPath ? fs.existsSync(fullPath) : false;
+          chat.mediaPath = fullPath ? mediaPath : null;
+      });
+
+      // Response dalam format yang diminta oleh DataTables
+      return response.json({
+          draw: request.input('draw'),
+          recordsTotal: totalRecords[0].total,
+          recordsFiltered: filteredRecords[0].total,
+          data: data,
+      });
         // Response dalam format yang diminta oleh DataTables
         return response.json({
           draw: request.input('draw'),

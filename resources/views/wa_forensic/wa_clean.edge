@@ -12,7 +12,7 @@
 title: 'WA Clean Management',
 li_1: 'Page'})
 
-
+{{-- <img src="/Media/WhatsApp Business Images/IMG-20241005-WA0001.jpg" alt="" srcset=""> --}}
 <div class="card p-4">
     <table class="table dt-responsive  w-100" id="wa_clean_table">
         <thead>
@@ -24,6 +24,7 @@ li_1: 'Page'})
                 <th>B-Identity</th>
                 <th>Group Name</th>
                 <th>Chat Type</th>
+                <th>Media</th>
                 <th>Direction</th>
                 <th>Content</th>
             </tr>
@@ -47,14 +48,14 @@ li_1: 'Page'})
 <script>
     $(document).ready(function () {
         $('#wa_clean_table').DataTable({
-            processing: true,
+            processing: false,
             serverSide: true,
             ajax: {
                 url: '{{ route('chats.data_wa_clean') }}',
                 type: 'POST',
                 data: function (d) {
                     d._csrf = '{{ csrfToken }}'; // CSRF token
-                }
+                },
             },
             columns: [
                 { data: null, searchable: false, orderable: false },
@@ -84,6 +85,31 @@ li_1: 'Page'})
                 },
                 { data: 'group_name' },
                 { data: 'chat_type' },
+                {
+                    data: 'media',
+                    render: function (data, type, row) {
+                        // Cek apakah media ada berdasarkan respons 'exists'
+                        if (!row.mediaPath) {
+                            return data;
+                        }
+
+                        const chatType = row.chat_type;
+                        let mediaHTML = '';
+
+                        // Logika untuk menampilkan media sesuai chat_type
+                        if (chatType.includes('Image')) {
+                            mediaHTML = `<img src="/${data}" alt="Image" style="max-width: 100px;">`;
+                        } else if (chatType.includes('Video')) {
+                            mediaHTML = `<video controls style="max-width: 100px;"><source src="/${data}" type="video/mp4">Your browser does not support the video tag.</video>`;
+                        } else if (chatType.includes('Voice Notes')) {
+                            mediaHTML = `<audio controls><source src="/${data}" type="audio/ogg">Your browser does not support the audio tag.</audio>`;
+                        } else {
+                            mediaHTML = data; // Jika tidak ada media yang sesuai
+                        }
+
+                        return mediaHTML;
+                    }
+                },
                 { data: 'direction' },
                 { data: 'content' }
             ],

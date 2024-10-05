@@ -4,7 +4,7 @@ import Hash from '@ioc:Adonis/Core/Hash'
 import View from '@ioc:Adonis/Core/View'
 export default class AuthController {
   public async login_show({ view }: HttpContextContract) {
-    return view.render('auth/login')
+    return view.render('Auth/login')
   }
   public async register({ request, response, auth }: HttpContextContract) {
     const { username, email, password } = request.body()
