@@ -1,5 +1,5 @@
 @layout('layouts/master')
-@set('title', 'Call Logs')
+@set('title', 'WA Media')
 @section('css')
 <link href="/libs/datatables.net-bs4/datatables.net-bs4.min.css" rel="stylesheet" type="text/css" />
 <link href="/libs/datatables.net-buttons-bs4/datatables.net-buttons-bs4.min.css" rel="stylesheet" type="text/css" />
@@ -9,24 +9,25 @@
 @end
 @section('content')
 @!component('components/breadcrumb',{
-title: 'Call Logs Management',
+title: 'WA Media Management',
 li_1: 'Page'})
 
 
 <div class="card p-4">
-    <table class="table dt-responsive  w-100" id="wa_call_logs_table">
+    <table class="table dt-responsive  w-100" id="wa_contacts_table">
         <thead>
             <tr>
                 <th>#</th>
                 <th>Date</th>
                 <th>Time</th>
                 <th>Number</th>
-                <th>Name</th>
-                <th>Direction</th>
-                <th>Call ID</th>
-                <th>Call Type</th>
-                <th>Duration</th>
-                <th>Status Call</th>
+                <th>File Path</th>
+                <th>Media Type</th>
+                <th>File Size</th>
+                <th>Media Name</th>
+                <th>Media Caption</th>
+                <th>Media Duration</th>
+
             </tr>
         </thead>
 
@@ -48,11 +49,11 @@ li_1: 'Page'})
 <script src="/js/app.min.js"></script>
 <script>
     $(document).ready(function () {
-        $('#wa_call_logs_table').DataTable({
+        $('#wa_contacts_table').DataTable({
             processing: true,
             serverSide: true,
             ajax: {
-                url: '{{ route('chats.data_call_logs') }}',
+                url: '{{ route('chats.data_media') }}',
                 type: 'POST',
                 data: function (d) {
                     d._csrf = '{{ csrfToken }}'; // CSRF token
@@ -63,14 +64,14 @@ li_1: 'Page'})
                 { data: 'date' },
                 { data: 'time' },
                 { data: 'number' },
-                { data: 'name' },
-                { data: 'direction' },
-                { data: 'call_id' },
-                { data: 'call_type' },
-                { data: 'duration' },
-                { data: 'status_call' },
+                { data: 'file_path' },
+                { data: 'media_type' },
+                { data: 'file_size' },
+                { data: 'media_name' },
+                { data: 'media_caption' },
+                { data: 'media_duration' },
             ],
-            order: [[1, 'asc']],
+            order: [[1, 'desc']],
             columnDefs: [
                 {
                     targets: 0,

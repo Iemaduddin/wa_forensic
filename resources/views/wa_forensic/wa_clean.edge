@@ -1,5 +1,5 @@
 @layout('layouts/master')
-@set('title', 'WA Media')
+@set('title', 'WA Clean')
 @section('css')
 <link href="/libs/datatables.net-bs4/datatables.net-bs4.min.css" rel="stylesheet" type="text/css" />
 <link href="/libs/datatables.net-buttons-bs4/datatables.net-buttons-bs4.min.css" rel="stylesheet" type="text/css" />
@@ -9,28 +9,25 @@
 @end
 @section('content')
 @!component('components/breadcrumb',{
-title: 'WA Media Management',
+title: 'WA Clean Management',
 li_1: 'Page'})
 
 
 <div class="card p-4">
-    <table class="table dt-responsive  w-100" id="wa_contacts_table">
+    <table class="table dt-responsive  w-100" id="wa_clean_table">
         <thead>
             <tr>
                 <th>#</th>
                 <th>Date</th>
                 <th>Time</th>
-                <th>Number</th>
-                <th>File Path</th>
-                <th>Media Type</th>
-                <th>File Size</th>
-                <th>Media Name</th>
-                <th>Media Caption</th>
-                <th>Media Duration</th>
-
+                <th>A-Identity</th>
+                <th>B-Identity</th>
+                <th>Group Name</th>
+                <th>Chat Type</th>
+                <th>Direction</th>
+                <th>Content</th>
             </tr>
         </thead>
-
     </table>
 </div>
 @end
@@ -49,29 +46,48 @@ li_1: 'Page'})
 <script src="/js/app.min.js"></script>
 <script>
     $(document).ready(function () {
-        $('#wa_contacts_table').DataTable({
+        $('#wa_clean_table').DataTable({
             processing: true,
             serverSide: true,
             ajax: {
-                url: '{{ route('chats.data_media') }}',
+                url: '{{ route('chats.data_wa_clean') }}',
                 type: 'POST',
                 data: function (d) {
                     d._csrf = '{{ csrfToken }}'; // CSRF token
                 }
             },
             columns: [
-                { data: null, searchable: false, orderable: false }, // Index
+                { data: null, searchable: false, orderable: false },
                 { data: 'date' },
                 { data: 'time' },
-                { data: 'number' },
-                { data: 'file_path' },
-                { data: 'media_type' },
-                { data: 'file_size' },
-                { data: 'media_name' },
-                { data: 'media_caption' },
-                { data: 'media_duration' },
+                { data: 'a_identity' },
+                {
+                    data: 'b_identity', // Menampilkan 'a_identity'
+                    render: function (data, type, row) {
+                        // Memisahkan elemen berdasarkan koma tetapi tidak memecah yang ada di dalam tanda kurung
+                        const regex = /,\s*(?![^()]*\))/;
+                        const parts = data.split(regex);
+
+                        let formatted = parts[0] || ''; // Nomor di baris pertama
+                        if (parts[1]) {
+                            if (parts[2]) {
+                                formatted += '<br>' + parts[1]; // Nama di baris kedua
+                            } else {
+                                formatted += '<br>' + '(' + parts[1] + ')'; // Nama di baris kedua dengan tanda kurung
+                            }
+                        }
+                        if (parts[2]) {
+                            formatted += '<br>' + parts[2]; // Social link  di baris ketiga
+                        }
+                        return formatted;
+                    }
+                },
+                { data: 'group_name' },
+                { data: 'chat_type' },
+                { data: 'direction' },
+                { data: 'content' }
             ],
-            order: [[1, 'asc']],
+            order: [[1, 'desc']],
             columnDefs: [
                 {
                     targets: 0,

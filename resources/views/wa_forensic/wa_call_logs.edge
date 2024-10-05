@@ -1,5 +1,5 @@
 @layout('layouts/master')
-@set('title', 'WA Clean')
+@set('title', 'Call Logs')
 @section('css')
 <link href="/libs/datatables.net-bs4/datatables.net-bs4.min.css" rel="stylesheet" type="text/css" />
 <link href="/libs/datatables.net-buttons-bs4/datatables.net-buttons-bs4.min.css" rel="stylesheet" type="text/css" />
@@ -9,48 +9,27 @@
 @end
 @section('content')
 @!component('components/breadcrumb',{
-title: 'WA Clean Management',
+title: 'Call Logs Management',
 li_1: 'Page'})
 
 
 <div class="card p-4">
-    <table class="table dt-responsive  w-100" id="wa_clean_table">
+    <table class="table dt-responsive  w-100" id="wa_call_logs_table">
         <thead>
             <tr>
                 <th>#</th>
                 <th>Date</th>
                 <th>Time</th>
-                <th>A Name</th>
-                <th>A Number</th>
-                <th>A Social Link</th>
-                <th>B Name</th>
-                <th>B Number</th>
-                <th>B Social Link</th>
-                <th>Group Name</th>
-                <th>Chat Type</th>
+                <th>Number</th>
+                <th>Name</th>
                 <th>Direction</th>
-                <th>Content</th>
+                <th>Call ID</th>
+                <th>Call Type</th>
+                <th>Duration</th>
+                <th>Status Call</th>
             </tr>
         </thead>
-        <tbody>
-            {{-- @each((chat, index) in chats)
-            <tr>
-                <td>{{index+1}}</td>
-                <td>{{chat.date}}</td>
-                <td>{{chat.time}}</td>
-                <td>{{chat.a_name}}</td>
-                <td>{{chat.a_number}}</td>
-                <td>{{chat.a_social_link}}</td>
-                <td>{{chat.b_name}}</td>
-                <td>{{chat.b_number}}</td>
-                <td>{{chat.b_social_link}}</td>
-                <td>{{chat.group_name}}</td>
-                <td>{{chat.chat_type}}</td>
-                <td>{{chat.direction}}</td>
-                <td>{{chat.content}}</td>
-            </tr>
-            @endeach --}}
-        </tbody>
+
     </table>
 </div>
 @end
@@ -69,11 +48,11 @@ li_1: 'Page'})
 <script src="/js/app.min.js"></script>
 <script>
     $(document).ready(function () {
-        $('#wa_clean_table').DataTable({
+        $('#wa_call_logs_table').DataTable({
             processing: true,
             serverSide: true,
             ajax: {
-                url: '{{ route('chats.data_wa_clean') }}',
+                url: '{{ route('chats.data_call_logs') }}',
                 type: 'POST',
                 data: function (d) {
                     d._csrf = '{{ csrfToken }}'; // CSRF token
@@ -83,18 +62,15 @@ li_1: 'Page'})
                 { data: null, searchable: false, orderable: false }, // Index
                 { data: 'date' },
                 { data: 'time' },
-                { data: 'a_name' },
-                { data: 'a_number' },
-                { data: 'a_social_link' },
-                { data: 'b_name' },
-                { data: 'b_number' },
-                { data: 'b_social_link' },
-                { data: 'group_name' },
-                { data: 'chat_type' },
+                { data: 'number' },
+                { data: 'name' },
                 { data: 'direction' },
-                { data: 'content' }
+                { data: 'call_id' },
+                { data: 'call_type' },
+                { data: 'duration' },
+                { data: 'status_call' },
             ],
-            order: [[1, 'asc']],
+            order: [[1, 'desc']],
             columnDefs: [
                 {
                     targets: 0,
