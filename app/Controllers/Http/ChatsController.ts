@@ -6,8 +6,6 @@ const path = require('path');
 export default class ChatsController {
     public async index({ view }: HttpContextContract) {
       const a_identity = await Database.from('wa_clean').select('a_number', 'a_name', 'a_social_link').first()
-      console.log(a_identity);
-      
         return view.render('wa_forensic/wa_clean', { a_identity: a_identity })
       }
       async data_wa_clean({ request, response }) {
