@@ -12,8 +12,49 @@
 title: 'WA Clean Management',
 li_1: 'Page'})
 
-{{-- <img src="/Media/WhatsApp Business Images/IMG-20241005-WA0001.jpg" alt="" srcset=""> --}}
 <div class="card p-4">
+    <div class="mb-3">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalEditA_Identity">
+            Edit A-Identity
+        </button>
+        <div class="modal fade" id="modalEditA_Identity" tabindex="-1" aria-labelledby="editA_IdentityModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editA_IdentityModalLabel">Edit A-Identity</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{route('chats.update_a_identity')}}" id="updateAIdentity" method="POST">
+                        <div class="modal-body">
+                            {{ csrfField() }}
+                            <div class="mb-3">
+                                <label for="a_number" class="form-label">A-Number</label>
+                                <input type="number" class="form-control" name="a_number"
+                                    value="{{ a_identity.a_number ? a_identity.a_number : '' }}" required min="0"
+                                    step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                            </div>
+                            <div class="mb-3">
+                                <label for="a_name" class="form-label">A-Name</label>
+                                <input type="text" class="form-control" name="a_name"
+                                    value="{{ a_identity.a_name ? a_identity.a_name : ''}}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="a_social_link" class="form-label">A-Social Link</label>
+                                <input type="text" class="form-control" name="a_social_link"
+                                    value="{{ a_identity.a_social_link ?  a_identity.a_social_link : '' }}">
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <table class="table dt-responsive  w-100" id="wa_clean_table">
         <thead>
             <tr>
@@ -26,6 +67,7 @@ li_1: 'Page'})
                 <th>Chat Type</th>
                 <th>Media</th>
                 <th>Direction</th>
+                <th>Call Description</th>
                 <th>Content</th>
             </tr>
         </thead>
@@ -47,6 +89,55 @@ li_1: 'Page'})
 <script src="/js/app.min.js"></script>
 <script>
     $(document).ready(function () {
+        $('#updateAIdentity').on('submit', function (event) {  // Ganti '#yourFormID' dengan ID form Anda
+            event.preventDefault(); // Mencegah pengiriman form default
+
+            // Ambil data form
+            let formData = $(this).serialize();
+
+            $.ajax({
+                url: '{{ route('chats.update_a_identity') }}', // Pastikan route sudah benar
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        $('#modalEditA_Identity').modal('hide');
+                        $('#wa_clean_table').DataTable().ajax.reload();
+                        Swal.fire({
+                            title: 'Sukses!',
+                            text: response.message,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        $('#modalEditA_Identity').modal('hide');
+                        $('#wa_clean_table').DataTable().ajax.reload();
+                        Swal.fire({
+                            title: 'Gagal!',
+                            text: response.message,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $('#modalEditA_Identity').modal('hide');
+                    $('#wa_clean_table').DataTable().ajax.reload();
+
+                    Swal.fire({
+                        title: 'Kesalahan!',
+                        text: 'Terjadi kesalahan saat mengirim data.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
         $('#wa_clean_table').DataTable({
             processing: false,
             serverSide: true,
@@ -61,27 +152,49 @@ li_1: 'Page'})
                 { data: null, searchable: false, orderable: false },
                 { data: 'date' },
                 { data: 'time' },
-                { data: 'a_identity' },
                 {
-                    data: 'b_identity', // Menampilkan 'a_identity'
+                    data: 'a_number',
                     render: function (data, type, row) {
-                        // Memisahkan elemen berdasarkan koma tetapi tidak memecah yang ada di dalam tanda kurung
-                        const regex = /,\s*(?![^()]*\))/;
-                        const parts = data.split(regex);
+                        let a_number = row.a_number;
+                        let a_name = row.a_name;
+                        let a_social_link = row.a_social_link;
 
-                        let formatted = parts[0] || ''; // Nomor di baris pertama
-                        if (parts[1]) {
-                            if (parts[2]) {
-                                formatted += '<br>' + parts[1]; // Nama di baris kedua
+                        let a_identity = a_number || '';
+                        if (a_name) {
+                            if (a_social_link) {
+                                a_identity += '<br>' + a_name;
                             } else {
-                                formatted += '<br>' + '(' + parts[1] + ')'; // Nama di baris kedua dengan tanda kurung
+                                a_identity += '<br>' + '(' + a_name + ')';
                             }
                         }
-                        if (parts[2]) {
-                            formatted += '<br>' + parts[2]; // Social link  di baris ketiga
+                        if (a_social_link) {
+                            a_identity += '<br>' + '(' + a_social_link + ')';
                         }
-                        return formatted;
+                        return a_identity;
                     }
+
+                },
+                {
+                    data: 'b_number',
+                    render: function (data, type, row) {
+                        let b_number = row.b_number;
+                        let b_name = row.b_name;
+                        let b_social_link = row.b_social_link;
+
+                        let b_identity = b_number || '';
+                        if (b_name) {
+                            if (b_social_link) {
+                                b_identity += '<br>' + b_name;
+                            } else {
+                                b_identity += '<br>' + '(' + b_name + ')';
+                            }
+                        }
+                        if (b_social_link) {
+                            b_identity += '<br>' + b_social_link;
+                        }
+                        return b_identity;
+                    }
+
                 },
                 { data: 'group_name' },
                 { data: 'chat_type' },
@@ -98,7 +211,8 @@ li_1: 'Page'})
 
                         // Logika untuk menampilkan media sesuai chat_type
                         if (chatType.includes('Image')) {
-                            mediaHTML = `<img src="/${data}" alt="Image" style="max-width: 100px;">`;
+                            mediaHTML =
+                                ` <img src="/${data}" alt="Image" style="max-height:30rem">`;
                         } else if (chatType.includes('Video')) {
                             mediaHTML = `<video controls style="max-width: 100px;"><source src="/${data}" type="video/mp4">Your browser does not support the video tag.</video>`;
                         } else if (chatType.includes('Voice Notes')) {
@@ -107,10 +221,39 @@ li_1: 'Page'})
                             mediaHTML = data; // Jika tidak ada media yang sesuai
                         }
 
-                        return mediaHTML;
+                        return `
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mediaModal${row.id}">
+                                    <i class="mdi mdi-details"></i>
+                                </button>
+                                
+                                <!-- Modal -->
+                                <div class="modal fade" id="mediaModal${row.id}" tabindex="-1" aria-labelledby="mediaModalLabel${row.id}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="mediaModalLabel${row.id}">Media Content</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="card">
+                                            ${mediaHTML}
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                    </div>
+                                </div>
+                                </div>
+                        `;
                     }
                 },
                 { data: 'direction' },
+                {
+                    data: 'call_description',
+
+
+                },
                 { data: 'content' }
             ],
             order: [[1, 'desc']],

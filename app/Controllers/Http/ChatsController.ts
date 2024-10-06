@@ -5,7 +5,10 @@ const fs = require('fs');
 const path = require('path');
 export default class ChatsController {
     public async index({ view }: HttpContextContract) {
-        return view.render('wa_forensic/wa_clean')
+      const a_identity = await Database.from('wa_clean').select('a_number', 'a_name', 'a_social_link').first()
+      console.log(a_identity);
+      
+        return view.render('wa_forensic/wa_clean', { a_identity: a_identity })
       }
       async data_wa_clean({ request, response }) {
         const { start, length, search, order } = request.only(['start', 'length', 'search', 'order']);
@@ -19,8 +22,12 @@ export default class ChatsController {
             builder
               .where('date', 'like', `%${search.value}%`)
               .orWhere('time', 'like', `%${search.value}%`)
-              .orWhere('a_identity', 'like', `%${search.value}%`)
-              .orWhere('b_identity', 'like', `%${search.value}%`)
+              .orWhere('a_number', 'like', `%${search.value}%`)
+              .orWhere('a_name', 'like', `%${search.value}%`)
+              .orWhere('a_social_link', 'like', `%${search.value}%`)
+              .orWhere('b_number', 'like', `%${search.value}%`)
+              .orWhere('b_name', 'like', `%${search.value}%`)
+              .orWhere('b_social_link', 'like', `%${search.value}%`)
               .orWhere('group_name', 'like', `%${search.value}%`)
               .orWhere('chat_type', 'like', `%${search.value}%`)
               .orWhere('direction', 'like', `%${search.value}%`)
@@ -29,7 +36,7 @@ export default class ChatsController {
         }
 
           // Handle sorting
-        const orderColumn = ['date', 'time', 'a_identity', 'b_identity','group_name', 'chat_type', 'direction', 'content'];
+        const orderColumn = ['date', 'time', 'a_number','a_name', 'a_social_link', 'b_number', 'b_name', 'b_social_link', 'group_name', 'chat_type', 'direction', 'content'];
         if (order && order.length > 0) {
           const columnIndex = order[0].column;
           const sortColumn = orderColumn[columnIndex - 1]; // Dikurangi 1 karena kolom pertama untuk index
@@ -63,14 +70,28 @@ export default class ChatsController {
           recordsFiltered: filteredRecords[0].total,
           data: data,
       });
-        // Response dalam format yang diminta oleh DataTables
-        return response.json({
-          draw: request.input('draw'),
-          recordsTotal: totalRecords[0].total,
-          recordsFiltered: filteredRecords[0].total,
-          data: data
-        });
       }
+
+      public async update_a_identity({ request, response }) {
+        const a_number = request.input('a_number');
+        const a_name = request.input('a_name');
+        const a_social_link = request.input('a_social_link');
+          try{
+
+            const update_a_identity = await Database.from('wa_clean').where('a_number', a_number).update({
+              a_name: a_name,
+              a_social_link: a_social_link,
+            });
+
+            if (update_a_identity) {
+              return response.json({ success: true, message: 'Data berhasil diperbarui' });
+            } else {
+              return response.json({ success: false, message: 'Update gagal' });
+            }
+          } catch (error) {
+            return response.json({ success: false, message: 'Terjadi kesalahan: ' + error.message });
+          }
+        }
       public async data_call_logs({ request, response }) {
         const { start, length, search, order } = request.only(['start', 'length', 'search', 'order']);
     
