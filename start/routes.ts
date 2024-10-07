@@ -26,6 +26,7 @@ Route.group(() => {
   Route.get('/chats/wa_clean', 'ChatsController.index')
   Route.post('/chats/data/wa_clean', 'ChatsController.data_wa_clean').as('chats.data_wa_clean')
   Route.post('/chats/update_a_identity', 'ChatsController.update_a_identity').as('chats.update_a_identity')
+  Route.post('/chats/wa_clean/export_Pdf', 'ChatsController.wa_clean_exportPdf').as('chats.wa_clean_exportPdf')
 
   Route.get('/chats/wa_call_logs', 'ChatsController.call_logs')
   Route.post('/chats/data/call_logs', 'ChatsController.data_call_logs').as('chats.data_call_logs')
