@@ -22,7 +22,7 @@ li_1: 'Page'})
                         Edit A-Identity
                     </button>
 
-                    <form action="{{ route('chats.wa_clean_exportPdf') }}" method="POST">
+                    <form action="{{ route('chats.wa_clean_exportPdf') }}" target="_blank" method="POST">
                         {{ csrfField() }}
                         <button type="submit" class="btn btn-dark">
                             <i class="mdi mdi-export"></i>&nbsp;Export PDF
