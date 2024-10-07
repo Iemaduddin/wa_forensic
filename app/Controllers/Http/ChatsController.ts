@@ -111,10 +111,10 @@ export default class ChatsController {
   // Fungsi untuk export PDF
   public async wa_clean_exportPdf({ response }: HttpContextContract) {
     try {
-      // Create PDF document with A3 size
+      // Create PDF document with A4 size
       const doc = new PDFDocument({
-        margin: 30,
-        size: [1190.55, 842.91], // Ukuran A3
+        margin: 20,
+        size: [841.89, 595.28], // Ukuran A4
         bufferPages: true,
       })
 
@@ -134,7 +134,7 @@ export default class ChatsController {
         .font('Helvetica-Bold')
         .fontSize(16)
         .text('WhatsApp Chat Data Export', { align: 'center' })
-        .moveDown()
+        .moveDown(0)
 
       // Add timestamp with smaller font size
       doc
@@ -146,25 +146,25 @@ export default class ChatsController {
       const data = await Database.from('wa_clean')
 
       // Define table layout with smaller widths
-      const tableTop = 100
-      const rowHeight = 40 // Tinggi default baris
+      const tableTop = 60
+      const rowHeight = 30 // Tinggi default baris
       const columns = {
-        no: { x: 30, width: 30 },
-        date: { x: 60, width: 50 },
-        time: { x: 110, width: 50 },
-        a_identity: { x: 160, width: 90 },
-        b_identity: { x: 250, width: 90 },
-        group_name: { x: 340, width: 100 },
-        chat_type: { x: 440, width: 80 },
-        media: { x: 520, width: 100 },
-        direction: { x: 620, width: 80 },
-        call_description: { x: 700, width: 80 },
-        content: { x: 780, width: 380 },
+        no: { x: 20, width: 30 },
+        date: { x: 50, width: 40 },
+        time: { x: 90, width: 40 },
+        a_identity: { x: 130, width: 70 },
+        b_identity: { x: 200, width: 70 },
+        group_name: { x: 270, width: 80 },
+        chat_type: { x: 350, width: 70 },
+        media: { x: 420, width: 80 },
+        direction: { x: 500, width: 70 },
+        call_description: { x: 570, width: 70 },
+        content: { x: 640, width: 180 },
       }
 
       // Add table headers
       doc.font('Helvetica-Bold').fontSize(8)
-      doc.rect(30, tableTop, 1130, rowHeight).fill('#f0f0f0').stroke()
+      doc.rect(20, tableTop, 800, rowHeight).fill('#f0f0f0').stroke()
 
       // Header style
       Object.entries(columns).forEach(([key, value]) => {
@@ -188,7 +188,11 @@ export default class ChatsController {
       function formatIdentity(number, name, socialLink) {
         let identity = number || '' // Memulai dengan nomor
         if (name) {
-          identity += '\n' + name // Menambahkan nama dengan baris baru di depan
+          if (socialLink) {
+            identity += '\n' + name // Menambahkan nama dengan baris baru di depan
+          } else {
+            identity += '\n' + '(' + name + ')' // Menambahkan tautan sosial dengan kurung
+          }
         }
         if (socialLink) {
           identity += '\n' + '(' + socialLink + ')' // Menambahkan tautan sosial dengan kurung
@@ -216,6 +220,9 @@ export default class ChatsController {
         const groupNameHeight = doc.heightOfString(groupName, {
           width: columns.group_name.width - 10,
         })
+        const mediaHeight = doc.heightOfString(row.media, {
+          width: columns.media.width - 10,
+        })
 
         // Mendapatkan tinggi gambar jika ada
         const imagePath = row.media ? `public/${row.media}` : null // Mendapatkan path gambar jika ada
@@ -238,17 +245,18 @@ export default class ChatsController {
           aIdentityHeight + 10,
           bIdentityHeight + 10,
           groupNameHeight + 10,
+          mediaHeight + 10,
           imageHeight + 10 // Menambahkan tinggi gambar ke dalam perhitungan
         )
 
         // Cek jika tinggi baris melebihi batas halaman
-        if (rowTop + currentRowHeight > 780) {
+        if (rowTop + currentRowHeight > 555) {
           doc.addPage()
-          rowTop = 50
+          rowTop = 35
 
           // Tambahkan header ke halaman baru
           doc.font('Helvetica-Bold').fontSize(8)
-          doc.rect(30, rowTop, 1130, rowHeight).fill('#f0f0f0').stroke()
+          doc.rect(20, rowTop, 800, rowHeight).fill('#f0f0f0').stroke()
 
           // Menambahkan header untuk setiap kolom
           Object.entries(columns).forEach(([key, value]) => {
@@ -331,8 +339,9 @@ export default class ChatsController {
         doc.switchToPage(i)
         doc
           .fontSize(8)
-          .text(`Page ${i + 1} of ${pages.count}`, 50, doc.page.height - 50, { align: 'center' })
+          .text(`Page ${i + 1} of ${pages.count}`, doc.page.width - 150, 20, { align: 'right' }) // Menempatkan di pojok kanan atas
       }
+
       // Finalize PDF
       doc.end()
     } catch (error) {
