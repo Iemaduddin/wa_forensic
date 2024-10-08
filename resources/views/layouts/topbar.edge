@@ -22,7 +22,6 @@
                         <span class="logo-txt">LASBON</span>
                     </span>
                 </a>
-
             </div>
 
             <button type="button" class="btn btn-sm px-3 font-size-16 header-item" id="vertical-menu-btn">
@@ -32,24 +31,38 @@
 
         <div class="d-flex">
             <div class="dropdown d-inline-block">
-                <button type="button" class="btn header-item bg-light-subtle border-start border-end"
+                <button type="button"
+                    class="btn header-item bg-light-subtle border-start border-end d-flex align-items-center"
                     id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <img class="rounded-circle header-profile-user" src="" alt="Header Avatar">
-                    <span class="d-none d-xl-inline-block ms-1 fw-medium">{{ auth.user.username }}</span>
-                    <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
+
+                    <!-- Inisial username -->
+                    <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center">
+                        {{ auth.user.username ? auth.user.username.substring(0, 3).toUpperCase() : 'NA' }}
+                        <!-- Dua huruf pertama dari username -->
+                    </div>
+                    <div class="border-start mx-2" style="height: 40px;"></div>
+                    <!-- Kontainer untuk username dan email -->
+                    <div class="d-flex flex-column ms-2">
+                        <span class="fw-medium">{{ auth.user.username }}</span>
+                        <span class="fw-medium">{{ auth.user.email }}</span>
+                    </div>
+
+                    <!-- Ikon dropdown -->
+                    <i class="mdi mdi-chevron-down d-none d-xl-inline-block ms-2"></i>
                 </button>
+
                 <div class="dropdown-menu dropdown-menu-end">
-                    <a class="dropdown-item " href="javascript:void();"
-                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i
-                            class="bx bx-power-off font-size-16 align-middle me-1"></i> <span
-                            key="t-logout">Logout</span></a>
+                    <a class="dropdown-item" href="javascript:void();"
+                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <i class="bx bx-power-off font-size-16 align-middle me-1"></i>
+                        <span key="t-logout">Logout</span>
+                    </a>
                     <form id="logout-form" action="{{ route('AuthController.logout') }}" method="POST"
                         style="display: none;">
                         {{ csrfField() }}
                     </form>
                 </div>
             </div>
-
         </div>
     </div>
 </header>
