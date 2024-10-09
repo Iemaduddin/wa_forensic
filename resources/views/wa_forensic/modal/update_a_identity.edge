@@ -1,0 +1,37 @@
+<div class="modal fade" id="modalEditA_Identity" tabindex="-1" aria-labelledby="editA_IdentityModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editA_IdentityModalLabel">Edit A-Identity</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{route('chats.update_a_identity')}}" id="updateAIdentity" method="POST">
+                <div class="modal-body">
+                    {{ csrfField() }}
+                    <div class="mb-3">
+                        <label for="a_number" class="form-label">A-Number</label>
+                        <input type="number" class="form-control" name="a_number"
+                            value="{{ a_identity ? a_identity.a_number : '' }}" required min="0" step="1"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                    </div>
+                    <div class="mb-3">
+                        <label for="a_name" class="form-label">A-Name</label>
+                        <input type="text" class="form-control" name="a_name"
+                            value="{{ a_identity ? a_identity.a_name : ''}}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="a_social_link" class="form-label">A-Social Link</label>
+                        <input type="text" class="form-control" name="a_social_link"
+                            value="{{ a_identity ?  a_identity.a_social_link : '' }}">
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -43,10 +43,11 @@
                                     {{ csrfField() }}
 
                                     <div class="form-floating form-floating-custom mb-4">
-                                        <input type="email" class="form-control" id="input-username"
-                                            placeholder="Enter Email" value="admin@gmail.com" name="email" required>
+                                        <input type="text" class="form-control" id="input-username"
+                                            placeholder="Enter Email/Username" value="admin@gmail.com" name="login"
+                                            required>
 
-                                        <label for="input-username">Email</label>
+                                        <label for="input-username">Email/Username</label>
                                         <div class="form-floating-icon">
                                             <i data-feather="users"></i>
                                         </div>
@@ -54,7 +55,7 @@
 
                                     <div class="form-floating form-floating-custom mb-4 auth-pass-inputgroup">
                                         <input type="password" class="form-control pe-5 " name="password"
-                                            id="password-input" placeholder="Enter Password" value="password" required>
+                                            id="password-input" placeholder="Enter Password" value="Intelijen" required>
 
                                         <button type="button" class="btn btn-link position-absolute h-100 end-0 top-0"
                                             id="password-addon">

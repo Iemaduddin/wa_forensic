@@ -5,7 +5,6 @@ const path = require('path')
 import PDFDocument from 'pdfkit'
 import { promisify } from 'util'
 const execAsync = promisify(require('child_process').exec)
-import Hash from '@ioc:Adonis/Core/Hash'
 export default class ChatsController {
   public async index({ view }: HttpContextContract) {
     let a_identity = null // Inisialisasi dengan null

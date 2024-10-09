@@ -25,7 +25,7 @@ Route.get('/', async ({ response }) => {
 })
 Route.group(() => {
   Route.get('/chats/wa_clean', 'ChatsController.index')
-  Route.post('/chats/data/wa_clean', 'ChatsController.data_wa_clean').as('chats.data_wa_clean')
+  Route.get('/chats/data/wa_clean', 'ChatsController.data_wa_clean').as('chats.data_wa_clean')
   Route.post('/chats/update_a_identity', 'ChatsController.update_a_identity').as(
     'chats.update_a_identity'
   )
@@ -36,23 +36,23 @@ Route.group(() => {
   Route.post('/chats/wa_clean/run_script_py', 'ChatsController.run_script_py').as('run_script_py')
 
   Route.get('/chats/wa_call_logs', 'ChatsController.call_logs')
-  Route.post('/chats/data/call_logs', 'ChatsController.data_call_logs').as('chats.data_call_logs')
+  Route.get('/chats/data/call_logs', 'ChatsController.data_call_logs').as('chats.data_call_logs')
 
   Route.get('/chats/wa_display_profile', 'ChatsController.display_profile')
-  Route.post('/chats/data_display_profile', 'ChatsController.data_display_profile').as(
+  Route.get('/chats/data_display_profile', 'ChatsController.data_display_profile').as(
     'chats.data_display_profile'
   )
 
   Route.get('/chats/wa_contacts', 'ChatsController.contacts')
-  Route.post('/chats/data_contacts', 'ChatsController.data_contacts').as('chats.data_contacts')
+  Route.get('/chats/data_contacts', 'ChatsController.data_contacts').as('chats.data_contacts')
 
   Route.get('/chats/wa_group_profile', 'ChatsController.group_profile')
-  Route.post('/chats/data_group_profile', 'ChatsController.data_group_profile').as(
+  Route.get('/chats/data_group_profile', 'ChatsController.data_group_profile').as(
     'chats.data_group_profile'
   )
 
   Route.get('/chats/wa_media', 'ChatsController.media')
-  Route.post('/chats/data_media', 'ChatsController.data_media').as('chats.data_media')
+  Route.get('/chats/data_media', 'ChatsController.data_media').as('chats.data_media')
 
   Route.get('/users', 'UsersController.index')
   Route.post('/users/store', 'UsersController.store').as('users.store')
