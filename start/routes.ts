@@ -19,10 +19,7 @@
 */
 
 import Route from '@ioc:Adonis/Core/Route'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-import { promisify } from 'util'
-const execAsync = promisify(require('child_process').exec)
 Route.get('/', async ({ response }) => {
   return response.redirect('/login')
 })
@@ -36,65 +33,7 @@ Route.group(() => {
     'chats.wa_clean_exportPdf'
   )
   // run script python
-  Route.post(
-    '/chats/wa_clean/run_script_py',
-    async ({ request, response }: HttpContextContract) => {
-      try {
-        // Validasi input
-        const databaseName =
-          'wa_forensic_' + request.input('wa_owner_name').replace(/\s+/g, '_').toLowerCase()
-        const folderName =
-          'Forensic_' + request.input('wa_owner_name').replace(/\s+/g, '_').toUpperCase()
-
-        // Validasi yang lebih detail
-        if (!databaseName) {
-          return response.status(422).json({
-            status: 'error',
-            message: 'Nama database harus diisi',
-            details: 'Field database_name adalah wajib',
-          })
-        }
-
-        // Jalankan script python
-        try {
-          const { stdout, stderr } = await execAsync(
-            `python3 resources/python/main.py ${databaseName} ${folderName}`
-          )
-
-          if (stderr) {
-            return response.status(500).json({
-              status: 'error',
-              message: 'Terjadi error saat menjalankan script',
-              error: stderr,
-              details: 'Lihat log server untuk informasi lebih lanjut',
-            })
-          }
-
-          return response.status(200).json({
-            status: 'success',
-            message: `Database ${databaseName} telah berhasil dibuat!`,
-            output: stdout,
-          })
-        } catch (execError) {
-          console.error('Script execution error:', execError)
-          return response.status(500).json({
-            status: 'error',
-            message: 'Gagal menjalankan script Python',
-            error: execError.message,
-            details: 'Pastikan Python dan dependensi yang diperlukan sudah terinstall',
-          })
-        }
-      } catch (error) {
-        console.error('Server error:', error)
-        return response.status(500).json({
-          status: 'error',
-          message: 'Terjadi kesalahan internal server',
-          error: error.message,
-          details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
-        })
-      }
-    }
-  ).as('run_script_py')
+  Route.post('/chats/wa_clean/run_script_py', 'ChatsController.run_script_py').as('run_script_py')
 
   Route.get('/chats/wa_call_logs', 'ChatsController.call_logs')
   Route.post('/chats/data/call_logs', 'ChatsController.data_call_logs').as('chats.data_call_logs')

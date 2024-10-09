@@ -3,6 +3,9 @@ import Database from '@ioc:Adonis/Lucid/Database'
 const fs = require('fs')
 const path = require('path')
 import PDFDocument from 'pdfkit'
+import { promisify } from 'util'
+const execAsync = promisify(require('child_process').exec)
+import Hash from '@ioc:Adonis/Core/Hash'
 export default class ChatsController {
   public async index({ view }: HttpContextContract) {
     const a_identity = await Database.from('wa_clean')
@@ -673,5 +676,109 @@ export default class ChatsController {
       recordsFiltered: filteredRecords[0].total,
       data: data,
     })
+  }
+
+  async run_script_py({ request, response }: HttpContextContract) {
+    try {
+      // Validasi input
+      const databaseName =
+        'wa_forensic_' + request.input('wa_owner_name').replace(/\s+/g, '_').toLowerCase()
+      const folderName =
+        'Forensic_' + request.input('wa_owner_name').replace(/\s+/g, '_').toUpperCase()
+
+      if (!databaseName) {
+        return response.status(422).json({
+          status: 'error',
+          message: 'Nama database harus diisi',
+          details: 'Field database_name adalah wajib',
+        })
+      }
+
+      // Jalankan script Python
+      try {
+        const { stdout, stderr } = await execAsync(
+          `python3 resources/python/main.py ${databaseName} ${folderName}`
+        )
+
+        if (stderr) {
+          return response.status(500).json({
+            status: 'error',
+            message: 'Terjadi error saat menjalankan script Python',
+            error: stderr,
+            details: 'Lihat log server untuk informasi lebih lanjut',
+          })
+        }
+        // Jalankan script Python untuk membuat table users
+        try {
+          const { stdout, stderr } = await execAsync(
+            `python3 resources/python/create_users_table.py ${databaseName}`
+          )
+
+          if (stderr) {
+            return response.status(500).json({
+              status: 'error',
+              message: 'Terjadi error saat menjalankan script Python',
+              error: stderr,
+              details: 'Lihat log server untuk informasi lebih lanjut',
+            })
+          }
+        } catch (e) {
+          return response.status(500).json({
+            status: 'error',
+            message: 'Terjadi kesalahan saat membuat user',
+            error: e.message,
+          })
+        }
+        const envFilePath = path.join(process.cwd(), '.env')
+        if (!fs.existsSync(envFilePath)) {
+          throw new Error('File .env tidak ditemukan')
+        }
+
+        // Backup .env file terlebih dahulu
+        const envBackupPath = path.join(process.cwd(), '.env.backup')
+        fs.copyFileSync(envFilePath, envBackupPath)
+        try {
+          // Baca dan update konten .env
+          let envContent = fs.readFileSync(envFilePath, 'utf-8')
+          envContent = envContent.replace(
+            /MYSQL_DB_NAME=.*(\r?\n|$)/g,
+            `MYSQL_DB_NAME=${databaseName}$1`
+          )
+          fs.writeFileSync(envFilePath, envContent)
+
+          // Hapus backup file jika semua berhasil
+          fs.unlinkSync(envBackupPath)
+
+          return response.status(200).json({
+            status: 'success',
+            message: `Database ${databaseName} telah berhasil dibuat!`,
+            output: stdout,
+          })
+        } catch (error) {
+          // Jika terjadi error, kembalikan .env ke kondisi semula
+          if (fs.existsSync(envBackupPath)) {
+            fs.copyFileSync(envBackupPath, envFilePath)
+            fs.unlinkSync(envBackupPath)
+          }
+          throw error
+        }
+      } catch (error) {
+        console.error('Server error:', error)
+        return response.status(500).json({
+          status: 'error',
+          message: 'Terjadi kesalahan internal server',
+          error: error.message,
+          details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        })
+      }
+    } catch (error) {
+      console.error('Server error:', error)
+      return response.status(500).json({
+        status: 'error',
+        message: 'Terjadi kesalahan internal server',
+        error: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      })
+    }
   }
 }

@@ -342,7 +342,6 @@ li_1: 'Page'})
 
             const formData = {
                 wa_owner_name: $('#wa_owner_name').val(),
-                database_name: $('#database_name').val(),
                 _csrf: csrf // Tambahkan CSRF token ke form data
             };
 
@@ -366,7 +365,7 @@ li_1: 'Page'})
                     }).then((result) => {
                         if (result.isConfirmed) {
                             $('#syncNewDbForm')[0].reset();
-                            window.location.href = document.referrer || '/';
+                            window.location.href = document.referrer || '/chats/wa_clean';
                         }
                     });
                 },
@@ -379,12 +378,10 @@ li_1: 'Page'})
                         if (response) {
                             if (response.message === 'E_BAD_CSRF_TOKEN: Invalid CSRF Token') {
                                 errorMessage = 'Sesi telah kadaluarsa. Silakan muat ulang halaman.';
-                                // Opsional: reload halaman secara otomatis
-                                // location.reload();
                             } else {
                                 errorMessage = response.message || response.error;
                             }
-                        } else if (xhr.status === 419) { // Laravel/AdonisJS CSRF token mismatch
+                        } else if (xhr.status === 419) { //AdonisJS CSRF token mismatch
                             errorMessage = 'Sesi telah kadaluarsa. Silakan muat ulang halaman.';
                         } else {
                             errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
