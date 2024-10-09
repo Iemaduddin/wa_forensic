@@ -8,11 +8,18 @@ const execAsync = promisify(require('child_process').exec)
 import Hash from '@ioc:Adonis/Core/Hash'
 export default class ChatsController {
   public async index({ view }: HttpContextContract) {
-    const a_identity = await Database.from('wa_clean')
-      .select('a_number', 'a_name', 'a_social_link')
-      .first()
+    let a_identity = null // Inisialisasi dengan null
+    try {
+      a_identity = await Database.from('wa_clean')
+        .select('a_number', 'a_name', 'a_social_link')
+        .first()
+    } catch (error) {
+      console.error('Error fetching data from wa_clean:', error.message)
+    }
+
     return view.render('wa_forensic/wa_clean', { a_identity: a_identity })
   }
+
   async data_wa_clean({ request, response }) {
     const { start, length, search, order } = request.only(['start', 'length', 'search', 'order'])
 

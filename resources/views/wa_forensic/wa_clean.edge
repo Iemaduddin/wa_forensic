@@ -55,18 +55,18 @@ li_1: 'Page'})
                             <div class="mb-3">
                                 <label for="a_number" class="form-label">A-Number</label>
                                 <input type="number" class="form-control" name="a_number"
-                                    value="{{ a_identity.a_number ? a_identity.a_number : '' }}" required min="0"
-                                    step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                                    value="{{ a_identity ? a_identity.a_number : '' }}" required min="0" step="1"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                             </div>
                             <div class="mb-3">
                                 <label for="a_name" class="form-label">A-Name</label>
                                 <input type="text" class="form-control" name="a_name"
-                                    value="{{ a_identity.a_name ? a_identity.a_name : ''}}">
+                                    value="{{ a_identity ? a_identity.a_name : ''}}">
                             </div>
                             <div class="mb-3">
                                 <label for="a_social_link" class="form-label">A-Social Link</label>
                                 <input type="text" class="form-control" name="a_social_link"
-                                    value="{{ a_identity.a_social_link ?  a_identity.a_social_link : '' }}">
+                                    value="{{ a_identity ?  a_identity.a_social_link : '' }}">
                             </div>
 
                         </div>

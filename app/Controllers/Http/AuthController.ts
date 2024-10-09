@@ -46,8 +46,8 @@ export default class AuthController {
       const rememberMe = request.input('rememberMe') === 'on'
       await auth.use('web').attempt(email, password, rememberMe)
       return response.redirect('/users')
-    } catch {
-      return response.badRequest('Invalid credentials He')
+    } catch (error) {
+      return response.badRequest('Invalid credentials' + error.message)
     }
   }
   // Generate token
