@@ -13,13 +13,13 @@ title: 'Users Management',
 li_1: 'Page'})
 <button class="btn btn-success btn-md rounded fw-bold text-white mb-4" type="button" data-bs-toggle="modal"
   data-bs-target="#tambahUser">
-  <i class="fas fa-plus"></i>&nbsp;&nbsp;&nbsp;Tambah Data
+  <i class="fas fa-plus"></i>&nbsp;&nbsp;&nbsp;Add User
 </button>
 
 @include('users/modal/create_user')
 
 <div class="card p-4">
-  <table class="table dt-responsive  w-100" id="users_table">
+  <table class="table dt-responsive w-100" id="users_table">
     <thead>
       <tr>
         <th>#</th>
@@ -35,13 +35,14 @@ li_1: 'Page'})
         <td>{{user.username}}</td>
         <td>{{user.email}}</td>
         <td>
-          <div class="btn-group" role="group" aria-label="Basic example">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+          <div class="d-flex gap-2" role="group" aria-label="Basic example">
+            <button type="button" class="btn btn-outline-primary btn-rounded" data-bs-toggle="modal"
               data-bs-target="#updateDataUser-{{user.id}}">Update</button>
             @include('users/modal/update_user')
             <form action="{{route('users.delete', {id:user.id})}}" method="post">
               {{ csrfField() }}
-              <button type="submit" class="btn btn-danger confirm-delete">Delete</button>
+              <button type="submit" class="btn btn-outline-danger btn-rounded confirm-delete" {{user.id ? 'disabled'
+                : '' }}>Delete</button>
             </form>
           </div>
         </td>
