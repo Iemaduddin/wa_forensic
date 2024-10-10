@@ -50,7 +50,11 @@
 
 <script src="https://cdn.datatables.net/2.1.5/js/dataTables.js"></script> --}}
 <script>
-    $('#users_table').DataTable();
+    $(document).ready(function () {
+        $('#users_table').DataTable()
+    })
+
+
 </script>
 <script>
     $(document).on('click', '.confirm-delete', function (event) {

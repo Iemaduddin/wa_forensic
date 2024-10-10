@@ -18,6 +18,3 @@ logs
 .yarn/install-state.gz
 .pnp.*
 .yarn-integrity
-resources/python/db_result
-resources/python/msgstore.db
-resources/python/wa.db

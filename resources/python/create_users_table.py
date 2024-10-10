@@ -34,7 +34,7 @@ def create_users_table(database_name):
             # 2. Sisipkan data pengguna
             username = 'admin'
             email = 'admin@gmail.com'
-            password = 'Intelijen'  
+            password = 'password'  
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
             insert_user_query = """
             INSERT INTO users (username, email, password) VALUES (%s, %s, %s);

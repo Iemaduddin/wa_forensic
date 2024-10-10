@@ -1,13 +1,13 @@
-<div class="modal fade" id="tambahUser" tabindex="-1" role="dialog" aria-labelledby="modalTambahUser"
+<div class="modal fade text-left" id="tambahUser" tabindex="-1" role="dialog" aria-labelledby="modalTambahUser"
     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered " role="document">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title" id="modalTambahUser">Tambah Data User</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
-                {{ csrfField() }}
+               {{ csrfField() }}
                 <div class="modal-body">
                     <div class="row">
                         <div class="col">
@@ -17,42 +17,30 @@
                             </div>
                             <label>Username</label>
                             <div class="form-group mb-3">
-                                <input type="text" placeholder="Username" class="form-control" name="username" required>
+                                <input type="text" placeholder="Username" class="form-control" name="username"
+                                    required>
                             </div>
                             <label>Password</label>
                             <div class="form-group mb-3">
                                 <div class="input-group">
-                                    <input type="password" name="password" class="form-control" aria-label="Password"
-                                        id="passwordAddUser" placeholder="Password">
-                                    <span class="input-group-text" id="show-password-toggle-add-user"><i
-                                            class="fa fa-eye" aria-hidden="true"></i></span>
+                                    <input type="password" placeholder="Password" class="form-control" name="password"
+                                        id="tambahPasswordUser" required>
+                                    <span class="input-group-text" id="show-password-toggle-tambahUser">
+                                        <i class="fa fa-eye" aria-hidden="true"></i>
+                                    </span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Submit</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="bx bx-x d-block d-sm-none"></i>
                         <span class="d-none d-sm-block">Close</span>
                     </button>
+                    <button type="submit" class="btn btn-success">Simpan</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-{{-- eye password --}}
-<script>
-    const showPasswordToggleAdd = document.querySelector("#show-password-toggle-add-user");
-    const passwordFieldAdd = document.querySelector("#passwordAddUser");
-
-    showPasswordToggleAdd.addEventListener("click", function () {
-        const type = passwordFieldAdd.getAttribute("type") === "password" ? "text" : "password";
-        passwordFieldAdd.setAttribute("type", type);
-
-        // Toggle eye icon
-        const eyeIconClassAdd = type === "password" ? "fa-eye" : "fa-eye-slash";
-        this.innerHTML = `<i class="fa ${eyeIconClassAdd}" aria-hidden="true"></i>`;
-    });
-</script>
