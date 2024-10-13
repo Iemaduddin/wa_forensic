@@ -708,7 +708,8 @@ def create_database_if_not_exists(mysql_user, mysql_password, mysql_db):
         connection = mysql.connector.connect(
             host='localhost',  # Adjust host as needed
             user=mysql_user,
-            password=mysql_password
+            password=mysql_password,
+            charset='utf8mb4'
         )
         
         if connection.is_connected():
@@ -726,9 +727,9 @@ def create_database_if_not_exists(mysql_user, mysql_password, mysql_db):
 def import_to_mysql(mysql_dump_file, mysql_user, mysql_password, mysql_db):
     # Command to import SQL dump to MySQL
     if mysql_password:
-        command = f"mysql -u {mysql_user} -p{mysql_password} {mysql_db} < {mysql_dump_file}"
+        command = f"mysql --default-character-set=utf8mb4 -u {mysql_user} -p{mysql_password} {mysql_db} < {mysql_dump_file}"
     else:
-        command = f"mysql -u {mysql_user} {mysql_db} < {mysql_dump_file}"
+        command = f"mysql --default-character-set=utf8mb4 -u {mysql_user} {mysql_db} < {mysql_dump_file}"
     
     # Use subprocess to execute the command
     try:

@@ -16,6 +16,8 @@ export default class UsersController {
   public async store({ request, response }: HttpContextContract) {
     try {
       const { email, username, password } = request.body()
+      console.log(password)
+
       await User.create({ email, username, password })
 
       return response.redirect('back')

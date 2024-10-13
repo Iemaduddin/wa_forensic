@@ -41,8 +41,8 @@ li_1: 'Page'})
             @include('users/modal/update_user')
             <form action="{{route('users.delete', {id:user.id})}}" method="post">
               {{ csrfField() }}
-              <button type="submit" class="btn btn-outline-danger btn-rounded confirm-delete" {{user.id ? 'disabled'
-                : '' }}>Delete</button>
+              <button type="submit" class="btn btn-outline-danger btn-rounded confirm-delete"
+                {{user.id==auth.user.id? 'disabled' : '' }}>Delete</button>
             </form>
           </div>
         </td>

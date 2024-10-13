@@ -4,6 +4,9 @@ const fs = require('fs')
 const path = require('path')
 import PDFDocument from 'pdfkit'
 import { promisify } from 'util'
+const os = require('os')
+import Hash from '@ioc:Adonis/Core/Hash'
+import { exit } from 'process'
 const execAsync = promisify(require('child_process').exec)
 export default class ChatsController {
   public async index({ view }: HttpContextContract) {
@@ -118,7 +121,7 @@ export default class ChatsController {
   }
 
   // Fungsi untuk export PDF
-  public async wa_clean_exportPdf({ response }: HttpContextContract) {
+  public async wa_clean_exportPdf({ response, request }: HttpContextContract) {
     try {
       // Create PDF document with A4 size
       const doc = new PDFDocument({
@@ -127,27 +130,55 @@ export default class ChatsController {
         bufferPages: true,
       })
 
-      // Generate dynamic filename with current date
-      const currentDate = new Date().toISOString().split('T')[0] // Format YYYY-MM-DD
-      const filename = `Report_WA_Forensic_${currentDate}.pdf`
+      // Fungsi untuk mendapatkan format tanggal yang diinginkan
+      function formatDate(date) {
+        const options = { day: '2-digit', month: 'short', year: 'numeric' }
+        return date.toLocaleDateString('en-GB', options)
+      }
 
-      // Set response headers for automatic download
+      // Mendapatkan waktu lokal
+      const currentDate = new Date()
+      const formattedDate = formatDate(currentDate)
+      const timeString = currentDate
+        .toLocaleTimeString('id-ID', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+        })
+        .replace(/:/g, '-')
+
+      // Membuat nama file PDF
+      const filename = `Report_WA_Forensic_${formattedDate}_${timeString}.pdf`
+      const outputPath = path.join(
+        process.env.HOME || process.env.USERPROFILE,
+        'Documents',
+        filename
+      )
+
+      // Buat stream untuk menyimpan file di Documents
+      doc.pipe(fs.createWriteStream(outputPath))
+      // Mengatur header respons untuk file PDF
       response.header('Content-Type', 'application/pdf')
       response.header('Content-Disposition', `attachment; filename="${filename}"`)
+      const isButtonExport = request.input('is_button_export')
+      console.log(isButtonExport)
 
-      // Pipe the PDF to the response
-      doc.pipe(response.response)
-
+      // Jika user menekan tombol export secara manual
+      if (isButtonExport == 1) {
+        // Pipe PDF to response
+        doc.pipe(response.response)
+      }
       // Add title with smaller font size
       doc
-        .font('Helvetica-Bold')
+        .font('public/fonts/BeVietnamPro-Bold.ttf')
         .fontSize(16)
         .text('WhatsApp Chat Data Export', { align: 'center' })
         .moveDown(0)
 
       // Add timestamp with smaller font size
       doc
-        .font('Helvetica')
+        .font('public/fonts/BeVietnamPro-Regular.ttf')
         .fontSize(8)
         .text(`Generated on: ${new Date().toLocaleString()}`, { align: 'center' })
 
@@ -172,7 +203,7 @@ export default class ChatsController {
       }
 
       // Add table headers
-      doc.font('Helvetica-Bold').fontSize(8)
+      doc.font('public/fonts/BeVietnamPro-Bold.ttf').fontSize(8)
       doc.rect(20, tableTop, 800, rowHeight).fill('#f0f0f0').stroke()
 
       // Header style
@@ -190,7 +221,7 @@ export default class ChatsController {
 
       // Add table content
       let rowTop = tableTop + rowHeight
-      doc.font('Helvetica').fontSize(8)
+      doc.font('public/fonts/BeVietnamPro-Regular.ttf').fontSize(8)
       let no = 1
 
       // Function to format identity
@@ -264,7 +295,7 @@ export default class ChatsController {
           rowTop = 35
 
           // Tambahkan header ke halaman baru
-          doc.font('Helvetica-Bold').fontSize(8)
+          doc.font('public/fonts/BeVietnamPro-Bold.ttf').fontSize(8)
           doc.rect(20, rowTop, 800, rowHeight).fill('#f0f0f0').stroke()
 
           // Menambahkan header untuk setiap kolom
@@ -281,7 +312,7 @@ export default class ChatsController {
           })
 
           rowTop += rowHeight // Tinggi setelah header
-          doc.font('Helvetica').fontSize(8)
+          doc.font('public/fonts/BeVietnamPro-Regular.ttf').fontSize(8)
         }
 
         // Wrap text and add row data
@@ -347,12 +378,14 @@ export default class ChatsController {
       for (let i = 0; i < pages.count; i++) {
         doc.switchToPage(i)
         doc
+          .font('public/fonts/BeVietnamPro-Regular.ttf')
           .fontSize(8)
-          .text(`Page ${i + 1} of ${pages.count}`, doc.page.width - 150, 20, { align: 'right' }) // Menempatkan di pojok kanan atas
+          .text(`Page ${i + 1} of ${pages.count}`, 50, doc.page.height - 40, { align: 'center' }) // Menempatkan di pojok kanan atas
       }
 
       // Finalize PDF
       doc.end()
+      return response.redirect('back')
     } catch (error) {
       console.error('Error generating PDF:', error)
       throw new Error('Failed to generate PDF')
@@ -686,24 +719,51 @@ export default class ChatsController {
 
   async run_script_py({ request, response }: HttpContextContract) {
     try {
-      // Validasi input
+      // Fungsi untuk mendapatkan format tanggal yang diinginkan
+      function formatDate(date) {
+        const options = { day: '2-digit', month: 'short', year: 'numeric' }
+        return date.toLocaleDateString('en-GB', options)
+      }
+
+      // Mendapatkan waktu lokal
+      const currentDate = new Date()
+      const formatedDate = formatDate(currentDate)
+      const formatedTime = currentDate
+        .toLocaleTimeString('id-ID', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+        })
+        .replace(/:/g, '-')
       const databaseName =
         'wa_forensic_' + request.input('wa_owner_name').replace(/\s+/g, '_').toLowerCase()
       const folderName =
-        'Forensic_' + request.input('wa_owner_name').replace(/\s+/g, '_').toUpperCase()
+        `Forensic_${request.input('wa_owner_name')}_${formatedDate}_${formatedTime}`
+          .replace(/\s+/g, '_')
+          .toUpperCase()
+      const waType = request.input('wa_type')
 
+      // Validasi input
       if (!databaseName) {
         return response.status(422).json({
           status: 'error',
-          message: 'Nama database harus diisi',
-          details: 'Field database_name adalah wajib',
+          message: 'Nama pemilik WhatsApp harus diisi',
+          details: 'Field wa_owner_name adalah wajib',
+        })
+      }
+      if (!waType) {
+        return response.status(422).json({
+          status: 'error',
+          message: 'Tipe WhatsApp harus diisi',
+          details: 'Field wa_type adalah wajib',
         })
       }
 
       // Jalankan script Python
       try {
         const { stdout, stderr } = await execAsync(
-          `python3 resources/python/main.py ${databaseName} ${folderName}`
+          `python3 resources/python/main.py ${databaseName} ${waType} ${folderName}`
         )
 
         if (stderr) {
@@ -716,14 +776,34 @@ export default class ChatsController {
         }
         // Jalankan script Python untuk membuat table users
         try {
-          const { stdout, stderr } = await execAsync(
-            `python3 resources/python/create_users_table.py ${databaseName}`
-          )
+          // Jalankan query SQL untuk membuat tabel `users`
+          await Database.rawQuery(`
+        CREATE TABLE IF NOT EXISTS ${databaseName}.users (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          username VARCHAR(255) NOT NULL UNIQUE,
+          email VARCHAR(255) NOT NULL UNIQUE,
+          password VARCHAR(180) NOT NULL,
+          remember_me_token VARCHAR(255),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        );
+      `)
+
+          const username = 'admin'
+          const email = 'admin@gmail.com'
+          const password = 'Intelijen'
+          const hashedPassword = await Hash.make(password)
+
+          await Database.table(`${databaseName}.users`).insert({
+            username,
+            email,
+            password: hashedPassword,
+          })
 
           if (stderr) {
             return response.status(500).json({
               status: 'error',
-              message: 'Terjadi error saat menjalankan script Python',
+              message: 'Terjadi error saat membuat user',
               error: stderr,
               details: 'Lihat log server untuk informasi lebih lanjut',
             })

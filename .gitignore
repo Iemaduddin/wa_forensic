@@ -21,3 +21,4 @@ logs
 resources/python/db_result
 resources/python/msgstore.db
 resources/python/wa.db
+.venv
