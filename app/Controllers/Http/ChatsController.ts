@@ -722,7 +722,6 @@ export default class ChatsController {
         const options = { day: '2-digit', month: 'short', year: 'numeric' }
         return date.toLocaleDateString('en-GB', options)
       }
-
       // Mendapatkan waktu lokal
       const currentDate = new Date()
       const formatedDate = formatDate(currentDate)
@@ -734,12 +733,11 @@ export default class ChatsController {
           hour12: false,
         })
         .replace(/:/g, '-')
-      const databaseName =
-        'wa_forensic_' + request.input('wa_owner_name').replace(/\s+/g, '_').toLowerCase()
-      const folderName =
-        `Forensic_${request.input('wa_owner_name')}_${formatedDate}_${formatedTime}`
-          .replace(/\s+/g, '_')
-          .toUpperCase()
+      const wa_name = request.input('wa_owner_name')
+      const databaseName = 'wa_forensic_' + wa_name.replace(/\s+/g, '_').toLowerCase()
+      const folderName = `Forensic_${wa_name}_${formatedDate}_${formatedTime}`
+        .replace(/\s+/g, '_')
+        .toUpperCase()
       const waType = request.input('wa_type')
 
       // Validasi input

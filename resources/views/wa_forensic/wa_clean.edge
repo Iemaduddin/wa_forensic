@@ -325,6 +325,93 @@ li_1: 'Page'})
         });
     });
 </script>
+<script>
+    $(document).ready(function () {
+        // Ambil CSRF token dari meta tag yang disediakan oleh AdonisJS
+        const csrf = $('meta[name="csrf-token"]').attr('content');
 
+        $('#syncNewDbForm').on('submit', function (event) {
+            event.preventDefault();
+
+            // Toggle button states
+            const submitBtn = $('#submitBtn');
+            const loadingBtn = $('.loading-spinner');
+            const closeBtn = $('.btn-secondary');
+
+            // Hide submit button, show loading button, disable close
+            submitBtn.addClass('d-none');
+            loadingBtn.removeClass('d-none');
+            loadingBtn.prop('disabled', true)
+            closeBtn.prop('disabled', true);
+
+            const formData = {
+                wa_owner_name: $('#wa_owner_name').val(),
+                wa_type: $('#wa_type').val(),
+                _csrf: csrf
+            };
+
+            $.ajax({
+                url: "{{ route('run_script_py') }}",
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrf
+                },
+                data: formData,
+                success: function (response) {
+                    // Tutup modal
+                    $('#modalSyncNewDb').modal('hide');
+
+                    // Tampilkan success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: response.message,
+                        confirmButtonColor: '#3085d6'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $('#syncNewDbForm')[0].reset();
+                            window.location.href = document.referrer || '/chats/wa_clean';
+                        }
+                    });
+                },
+                error: function (xhr, status, error) {
+                    let errorMessage = '';
+
+                    try {
+                        const response = xhr.responseJSON;
+
+                        if (response) {
+                            if (response.message === 'E_BAD_CSRF_TOKEN: Invalid CSRF Token') {
+                                errorMessage = 'Sesi telah kadaluarsa. Silakan muat ulang halaman.';
+                            } else {
+                                errorMessage = response.message || response.error;
+                            }
+                        } else if (xhr.status === 419) { //AdonisJS CSRF token mismatch
+                            errorMessage = 'Sesi telah kadaluarsa. Silakan muat ulang halaman.';
+                        } else {
+                            errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+                        }
+                    } catch (e) {
+                        errorMessage = 'Terjadi kesalahan dalam memproses response dari server.';
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: errorMessage,
+                        confirmButtonColor: '#d33'
+                    });
+                },
+                complete: function () {
+                    // Re-enable submit button dan hide loading state
+                    submitBtn.removeClass('d-none');
+                    loadingBtn.addClass('d-none');
+                    loadingBtn.prop('disabled', false)
+                    closeBtn.prop('disabled', false);
+                }
+            });
+        });
+    });
+</script>
 
 @end
