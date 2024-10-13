@@ -11,14 +11,17 @@
 @!component('components/breadcrumb',{
 title: 'Users Management',
 li_1: 'Page'})
-<button class="btn btn-success btn-md rounded fw-bold text-white mb-4" type="button" data-bs-toggle="modal"
-  data-bs-target="#tambahUser">
-  <i class="fas fa-plus"></i>&nbsp;&nbsp;&nbsp;Tambah Data
-</button>
 
 @include('users/modal/create_user')
 
 <div class="card p-4">
+  <div class="col">
+
+    <button class="btn btn-success btn-md rounded fw-bold text-white mb-4" type="button" data-bs-toggle="modal"
+      data-bs-target="#tambahUser">
+      <i class="fas fa-plus"></i>&nbsp;&nbsp;&nbsp;Add User
+  </div>
+  </button>
   <table class="table dt-responsive  w-100" id="users_table">
     <thead>
       <tr>
