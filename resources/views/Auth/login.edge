@@ -34,7 +34,7 @@
           <!-- end bubble effect -->
           <div class="card d-flex justify-content-center align-items-center" style="height:31rem;width:60rem">
             <div class="row h-100 w-100">
-              <div class="col-xxl-6 col-lg-6 col-md-6 col-sm-12 card-body p-5 pt-4">
+              <div class="col-xxl-6 col-md-12 col-sm-12 card-body p-5 pt-4">
                 <center>
                   <h2>PT. LASBON TECHNOLOGY INDONESIA</h2>
                   <p>Login to Acces the Website.</p>
@@ -43,10 +43,10 @@
                   {{ csrfField() }}
 
                   <div class="form-floating form-floating-custom mb-4">
-                    <input type="email" class="form-control" id="input-username" placeholder="Enter Email"
-                      value="admin@gmail.com" name="email" required>
+                    <input type="text" class="form-control" id="input-username" placeholder="Enter Email/Username"
+                      value="admin@gmail.com" name="login" required>
 
-                    <label for="input-username">Email</label>
+                    <label for="input-username">Email/Username</label>
                     <div class="form-floating-icon">
                       <i data-feather="users"></i>
                     </div>
@@ -82,8 +82,7 @@
                   </div>
                 </form>
               </div>
-              <div
-                class="col-xxl-6 col-lg-6 col-md-6 col-sm-12 card-body brandLogo bg-dark h-100 align-items-center text-center pt-4">
+              <div class="col-xxl-6 card-body brandLogo bg-dark h-100 align-items-center text-center pt-4">
                 <img src="favicon.ico" alt="" class="h-75">
               </div>
             </div>

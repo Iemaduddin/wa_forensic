@@ -1,9 +1,9 @@
-<div class="modal fade text-left" id="tambahUser" tabindex="-1" role="dialog" aria-labelledby="modalTambahUser"
+<div class="modal fade" id="tambahUser" tabindex="-1" role="dialog" aria-labelledby="modalTambahUser"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered " role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="modalTambahUser">Add User</h4>
+                <h4 class="modal-title" id="modalTambahUser">Tambah Data User</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
@@ -22,11 +22,10 @@
                             <label>Password</label>
                             <div class="form-group mb-3">
                                 <div class="input-group">
-                                    <input type="password" placeholder="Password" class="form-control" name="password"
-                                        id="tambahPasswordUser" required>
-                                    <span class="input-group-text" id="show-password-toggle-tambahUser">
-                                        <i class="fa fa-eye" aria-hidden="true"></i>
-                                    </span>
+                                    <input type="password" name="password" class="form-control" aria-label="Password"
+                                        id="passwordAddUser" placeholder="Password">
+                                    <span class="input-group-text" id="show-password-toggle-add-user"><i
+                                            class="fa fa-eye" aria-hidden="true"></i></span>
                                 </div>
                             </div>
                         </div>
@@ -43,3 +42,17 @@
         </div>
     </div>
 </div>
+{{-- eye password --}}
+<script>
+    const showPasswordToggleAdd = document.querySelector("#show-password-toggle-add-user");
+    const passwordFieldAdd = document.querySelector("#passwordAddUser");
+
+    showPasswordToggleAdd.addEventListener("click", function () {
+        const type = passwordFieldAdd.getAttribute("type") === "password" ? "text" : "password";
+        passwordFieldAdd.setAttribute("type", type);
+
+        // Toggle eye icon
+        const eyeIconClassAdd = type === "password" ? "fa-eye" : "fa-eye-slash";
+        this.innerHTML = `<i class="fa ${eyeIconClassAdd}" aria-hidden="true"></i>`;
+    });
+</script>
