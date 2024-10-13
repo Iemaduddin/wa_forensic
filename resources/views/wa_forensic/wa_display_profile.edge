@@ -51,7 +51,7 @@ li_1: 'Page'})
             serverSide: true,
             ajax: {
                 url: '{{ route('chats.data_display_profile') }}',
-                type: 'GET',
+                type: 'POST',
                 data: function (d) {
                     d._csrf = '{{ csrfToken }}'; // CSRF token
                 }

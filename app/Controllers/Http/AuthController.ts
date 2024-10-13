@@ -42,9 +42,9 @@ export default class AuthController {
   }
   public async login({ request, response, auth }: HttpContextContract) {
     try {
-      const { login, password } = request.body()
+      const { email, password } = request.body()
       const rememberMe = request.input('rememberMe') === 'on'
-      await auth.use('web').attempt(login, password, rememberMe)
+      await auth.use('web').attempt(email, password, rememberMe)
       return response.redirect('/users')
     } catch (error) {
       return response.badRequest('Invalid credentials' + error.message)

@@ -37,7 +37,7 @@ li_1: 'Page'})
             </div>
             <div class="col-4">
                 <div class="text-end align-items-center">
-                    <button class="btn btn-soft-success" data-bs-toggle="modal" data-bs-target="#modalSyncNewDb">
+                    <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalSyncNewDb">
                         <i class="mdi mdi-database-sync-outline"></i>
                         <span>Sync New Database</span>
                     </button>
@@ -45,9 +45,72 @@ li_1: 'Page'})
             </div>
         </div>
 
-        @include('wa_forensic/modal/update_a_identity')
-        @include('wa_forensic/modal/sync_new_db')
+        <div class="modal fade" id="modalEditA_Identity" tabindex="-1" aria-labelledby="editA_IdentityModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editA_IdentityModalLabel">Edit A-Identity</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{route('chats.update_a_identity')}}" id="updateAIdentity" method="POST">
+                        <div class="modal-body">
+                            {{ csrfField() }}
+                            <div class="mb-3">
+                                <label for="a_number" class="form-label">A-Number</label>
+                                <input type="number" class="form-control" name="a_number"
+                                    value="{{ a_identity ? a_identity.a_number : '' }}" required min="0" step="1"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                            </div>
+                            <div class="mb-3">
+                                <label for="a_name" class="form-label">A-Name</label>
+                                <input type="text" class="form-control" name="a_name"
+                                    value="{{ a_identity ? a_identity.a_name : ''}}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="a_social_link" class="form-label">A-Social Link</label>
+                                <input type="text" class="form-control" name="a_social_link"
+                                    value="{{ a_identity ?  a_identity.a_social_link : '' }}">
+                            </div>
 
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="modalSyncNewDb" tabindex="-1" aria-labelledby="syncNewDb" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="syncNewDb">Sync New Database</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="syncNewDbForm">
+                        {{ csrfField() }}
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="wa_owner_name" class="form-label">WhatsApp Owner Name</label>
+                                <input type="text" class="form-control" name="wa_owner_name" id="wa_owner_name"
+                                    required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <span class="submit-text">Submit</span>
+                            </button>
+                            <button type="button" class="btn btn-primary waves-effect loading-spinner d-none">
+                                <i class="bx bx-hourglass bx-spin font-size-16 align-middle me-2"></i> Loading
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
     <table class="table dt-responsive  w-100" id="wa_clean_table">
         <thead>
@@ -202,7 +265,7 @@ li_1: 'Page'})
             serverSide: true,
             ajax: {
                 url: '{{ route('chats.data_wa_clean') }}',
-                type: 'GET',
+                type: 'POST',
                 data: function (d) {
                     d._csrf = '{{ csrfToken }}'; // CSRF token
                 },

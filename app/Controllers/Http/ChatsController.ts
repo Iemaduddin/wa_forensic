@@ -4,10 +4,9 @@ const fs = require('fs')
 const path = require('path')
 import PDFDocument from 'pdfkit'
 import { promisify } from 'util'
-const os = require('os')
 import Hash from '@ioc:Adonis/Core/Hash'
-import { exit } from 'process'
 const execAsync = promisify(require('child_process').exec)
+
 export default class ChatsController {
   public async index({ view }: HttpContextContract) {
     let a_identity = null // Inisialisasi dengan null
@@ -162,7 +161,6 @@ export default class ChatsController {
       response.header('Content-Type', 'application/pdf')
       response.header('Content-Disposition', `attachment; filename="${filename}"`)
       const isButtonExport = request.input('is_button_export')
-      console.log(isButtonExport)
 
       // Jika user menekan tombol export secara manual
       if (isButtonExport == 1) {
