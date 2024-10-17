@@ -48,27 +48,27 @@ export default class ChatsController {
     }
 
     // Handle sorting
-    const orderColumn = [
-      'date',
-      'time',
-      'call_duration',
-      'a_number',
-      'a_name',
-      'a_social_link',
-      'b_number',
-      'b_name',
-      'b_social_link',
-      'group_name',
-      'chat_type',
-      'direction',
-      'content',
-    ]
-    if (order && order.length > 0) {
-      const columnIndex = order[0].column
-      const sortColumn = orderColumn[columnIndex - 1] // Dikurangi 1 karena kolom pertama untuk index
-      const sortDirection = order[0].dir === 'desc' ? 'desc' : 'asc'
-      query = query.orderBy(sortColumn, sortDirection)
-    }
+    // const orderColumn = [
+    //   'date',
+    //   'time',
+    //   'call_duration',
+    //   'a_number',
+    //   'a_name',
+    //   'a_social_link',
+    //   'b_number',
+    //   'b_name',
+    //   'b_social_link',
+    //   'group_name',
+    //   'chat_type',
+    //   'direction',
+    //   'content',
+    // ]
+    // if (order && order.length > 0) {
+    //   const columnIndex = order[0].column
+    //   const sortColumn = orderColumn[columnIndex - 1] // Dikurangi 1 karena kolom pertama untuk index
+    //   const sortDirection = order[0].dir === 'asc' ? 'asc' : 'desc'
+    //   query = query.orderBy('date', 'desc').orderBy('time', 'desc')
+    // }
 
     // Dapatkan total semua data (tanpa filtering)
     const totalRecords = await Database.from('wa_clean').count('* as total')
