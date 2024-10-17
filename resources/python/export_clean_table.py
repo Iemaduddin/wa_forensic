@@ -166,7 +166,8 @@ def create_wa_clean_dump(sqlite_db_1, sqlite_db_2, dump_file):
                 message.text_data AS 'content'
             FROM message
             JOIN chat ON message.chat_row_id = chat._id
-            JOIN jid ON chat.jid_row_id = jid._id;
+            JOIN jid ON chat.jid_row_id = jid._id
+            ORDER BY date DESC, time DESC;
         """)
 
         data = cursor1.fetchall()
