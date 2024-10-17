@@ -33,6 +33,7 @@ export default class ChatsController {
         builder
           .where('date', 'like', `%${search.value}%`)
           .orWhere('time', 'like', `%${search.value}%`)
+          .orWhere('call_duration', 'like', `%${search.value}%`)
           .orWhere('a_number', 'like', `%${search.value}%`)
           .orWhere('a_name', 'like', `%${search.value}%`)
           .orWhere('a_social_link', 'like', `%${search.value}%`)
@@ -42,7 +43,6 @@ export default class ChatsController {
           .orWhere('group_name', 'like', `%${search.value}%`)
           .orWhere('chat_type', 'like', `%${search.value}%`)
           .orWhere('direction', 'like', `%${search.value}%`)
-          .orWhere('call_description', 'like', `%${search.value}%`)
           .orWhere('content', 'like', `%${search.value}%`)
       })
     }
@@ -51,6 +51,7 @@ export default class ChatsController {
     const orderColumn = [
       'date',
       'time',
+      'call_duration',
       'a_number',
       'a_name',
       'a_social_link',
@@ -60,7 +61,6 @@ export default class ChatsController {
       'group_name',
       'chat_type',
       'direction',
-      'call_description',
       'content',
     ]
     if (order && order.length > 0) {
@@ -190,14 +190,14 @@ export default class ChatsController {
         no: { x: 20, width: 30 },
         date: { x: 50, width: 40 },
         time: { x: 90, width: 40 },
-        a_identity: { x: 130, width: 70 },
-        b_identity: { x: 200, width: 70 },
-        group_name: { x: 270, width: 80 },
-        chat_type: { x: 350, width: 70 },
-        media: { x: 420, width: 80 },
-        direction: { x: 500, width: 70 },
-        call_description: { x: 570, width: 70 },
-        content: { x: 640, width: 180 },
+        call_duration: { x: 130, width: 40 },
+        a_identity: { x: 170, width: 70 },
+        b_identity: { x: 240, width: 70 },
+        group_name: { x: 310, width: 80 },
+        chat_type: { x: 390, width: 70 },
+        media: { x: 460, width: 80 },
+        direction: { x: 540, width: 70 },
+        content: { x: 610, width: 210 },
       }
 
       // Add table headers
@@ -241,10 +241,10 @@ export default class ChatsController {
       for (const row of data) {
         const a_identity = formatIdentity(row.a_number, row.a_name, row.a_social_link)
         const b_identity = formatIdentity(row.b_number, row.b_name, row.b_social_link)
+        const callDuration = row.call_duration || 0
         const groupName = row.group_name || ''
         const chatType = row.chat_type || ''
         const direction = row.direction || ''
-        const callDescription = row.call_description || ''
         const content = row.content || ''
 
         // Menghitung tinggi baris berdasarkan isi kolom
@@ -332,6 +332,9 @@ export default class ChatsController {
         doc.text(b_identity || '', columns.b_identity.x + 5, rowTop + 5, {
           width: columns.b_identity.width - 10,
         })
+        doc.text(callDuration, columns.call_duration.x + 5, rowTop + 5, {
+          width: columns.call_duration.width - 10,
+        })
         doc.text(groupName, columns.group_name.x + 5, rowTop + 5, {
           width: columns.group_name.width - 10,
         })
@@ -340,9 +343,6 @@ export default class ChatsController {
         })
         doc.text(direction, columns.direction.x + 5, rowTop + 5, {
           width: columns.direction.width - 10,
-        })
-        doc.text(callDescription, columns.call_description.x + 5, rowTop + 5, {
-          width: columns.call_description.width - 10,
         })
 
         // Membungkus teks untuk konten

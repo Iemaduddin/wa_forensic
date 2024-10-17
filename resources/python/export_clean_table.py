@@ -29,6 +29,7 @@ def create_wa_clean_dump(sqlite_db_1, sqlite_db_2, dump_file):
             id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
             date VARCHAR(255),
             time VARCHAR(255),
+            call_duration INT,
             a_number VARCHAR(255),
             a_name VARCHAR(255),
             a_social_link VARCHAR(255),
@@ -39,7 +40,6 @@ def create_wa_clean_dump(sqlite_db_1, sqlite_db_2, dump_file):
             chat_type VARCHAR(255), 
             media VARCHAR(255), 
             direction VARCHAR(255),
-            call_description VARCHAR(255),
             content TEXT,
             content_definition TEXT
         );
@@ -75,6 +75,13 @@ def create_wa_clean_dump(sqlite_db_1, sqlite_db_2, dump_file):
             SELECT DISTINCT
                 DATE(message.timestamp / 1000, 'unixepoch','+7 hours') AS 'date',
                 TIME(message.timestamp / 1000, 'unixepoch','+7 hours') AS 'time',
+                (
+                    SELECT cl.duration 
+                    FROM message_call_log mcl
+                    JOIN call_log cl ON cl._id = mcl.call_log_row_id
+                    WHERE mcl.message_row_id = message._id
+                    LIMIT 1
+                ) AS 'call_duration',
                 (
                 CASE 
                     WHEN (SELECT user FROM jid WHERE _id = 1) IS NULL 
@@ -140,13 +147,6 @@ def create_wa_clean_dump(sqlite_db_1, sqlite_db_2, dump_file):
                     ELSE 'Incoming' 
                 END AS 'direction',
                 (
-                    SELECT cl.duration 
-                    FROM message_call_log mcl
-                    JOIN call_log cl ON cl._id = mcl.call_log_row_id
-                    WHERE mcl.message_row_id = message._id
-                    LIMIT 1
-                ) AS 'call_duration',
-                (
                     SELECT 
                         CASE 
                             WHEN cl.call_result = 2 THEN
@@ -174,7 +174,7 @@ def create_wa_clean_dump(sqlite_db_1, sqlite_db_2, dump_file):
 
         # Menulis data wa_clean ke dump file dengan join ke wa_contacts dan wa_group_admin_settings
         for row in data:
-            date, time, a_number, b_number, jid_raw_string, chat_subject, chat_type, media, direction, call_duration, status_call, content = row
+            date, time,call_duration, a_number, b_number, jid_raw_string, chat_subject, chat_type, media, direction,  status_call, content = row
             # Ambil b_name dari wa_contacts
             b_name = display_names.get(b_number, None)
             
@@ -183,7 +183,9 @@ def create_wa_clean_dump(sqlite_db_1, sqlite_db_2, dump_file):
                 group_name = chat_subject  # Ini adalah grup
             else:
                 group_name = None  # Ini adalah chat personal
-            
+                
+            call_duration = 0 if call_duration is None else call_duration
+
             # Inisialisasi b_social_link
             b_social_link = None
 
@@ -215,20 +217,19 @@ def create_wa_clean_dump(sqlite_db_1, sqlite_db_2, dump_file):
             date_obj = datetime.strptime(date, "%Y-%m-%d")
             formatted_date = date_obj.strftime("%d-%b-%y")
             
-            call_description = f"{call_duration or '0'}{f' ({status_call})' if status_call else ''}"
+            # call_description = f"{call_duration or '0'}{f' ({status_call})' if status_call else ''}"
             # Menyiapkan data untuk insert ke wa_clean
             row_data = [
                 f"'{escape_single_quotes(str(col))}'" if col is not None else 'NULL'
-                for col in [formatted_date, time, a_number, b_number, b_name, b_social_link, group_name, chat_type, media, direction, call_description, content]
+                for col in [formatted_date, time, call_duration, a_number, b_number, b_name, b_social_link, group_name, chat_type, media, direction, content]
             ]
             row_str = ', '.join(row_data)
 
-            insert_query = f"INSERT INTO wa_clean (date, time, a_number, b_number,b_name, b_social_link, group_name, chat_type, media, direction, call_description, content) VALUES ({row_str});\n"
+            insert_query = f"INSERT INTO wa_clean (date, time,call_duration, a_number, b_number,b_name, b_social_link, group_name, chat_type, media, direction, content) VALUES ({row_str});\n"
             f.write(insert_query)
 
     conn1.close()
     conn2.close()
-
 
 
 # Method untuk dump data wa_display_profile dari SQLite ke MySQL dump file

@@ -9,5 +9,5 @@ try:
 except :
     print("Please provide folder name and database name")
     
-export_clean_table.convert_database(database_name)
 get_data_forensic.get_data(wa_type, folder_name)
+export_clean_table.convert_database(database_name)
