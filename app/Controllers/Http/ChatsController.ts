@@ -177,7 +177,7 @@ export default class ChatsController {
       // Add timestamp with smaller font size
       doc
         .font('public/fonts/BeVietnamPro-Regular.ttf')
-        .fontSize(8)
+        .fontSize(6)
         .text(`Generated on: ${new Date().toLocaleString()}`, { align: 'center' })
 
       // Get data from database
@@ -190,7 +190,7 @@ export default class ChatsController {
         no: { x: 20, width: 30 },
         date: { x: 50, width: 40 },
         time: { x: 90, width: 40 },
-        call_duration: { x: 130, width: 40 },
+        duration: { x: 130, width: 40 },
         a_identity: { x: 170, width: 70 },
         b_identity: { x: 240, width: 70 },
         group_name: { x: 310, width: 80 },
@@ -201,7 +201,7 @@ export default class ChatsController {
       }
 
       // Add table headers
-      doc.font('public/fonts/BeVietnamPro-Bold.ttf').fontSize(8)
+      doc.font('public/fonts/BeVietnamPro-Bold.ttf').fontSize(6)
       doc.rect(20, tableTop, 800, rowHeight).fill('#f0f0f0').stroke()
 
       // Header style
@@ -219,7 +219,7 @@ export default class ChatsController {
 
       // Add table content
       let rowTop = tableTop + rowHeight
-      doc.font('public/fonts/BeVietnamPro-Regular.ttf').fontSize(8)
+      doc.font('public/fonts/BeVietnamPro-Regular.ttf').fontSize(6)
       let no = 1
 
       // Function to format identity
@@ -241,7 +241,7 @@ export default class ChatsController {
       for (const row of data) {
         const a_identity = formatIdentity(row.a_number, row.a_name, row.a_social_link)
         const b_identity = formatIdentity(row.b_number, row.b_name, row.b_social_link)
-        const callDuration = row.call_duration || 0
+        const duration = row.duration || 0
         const groupName = row.group_name || ''
         const chatType = row.chat_type || ''
         const direction = row.direction || ''
@@ -293,7 +293,7 @@ export default class ChatsController {
           rowTop = 35
 
           // Tambahkan header ke halaman baru
-          doc.font('public/fonts/BeVietnamPro-Bold.ttf').fontSize(8)
+          doc.font('public/fonts/BeVietnamPro-Bold.ttf').fontSize(6)
           doc.rect(20, rowTop, 800, rowHeight).fill('#f0f0f0').stroke()
 
           // Menambahkan header untuk setiap kolom
@@ -310,7 +310,7 @@ export default class ChatsController {
           })
 
           rowTop += rowHeight // Tinggi setelah header
-          doc.font('public/fonts/BeVietnamPro-Regular.ttf').fontSize(8)
+          doc.font('public/fonts/BeVietnamPro-Regular.ttf').fontSize(6)
         }
 
         // Wrap text and add row data
@@ -332,8 +332,8 @@ export default class ChatsController {
         doc.text(b_identity || '', columns.b_identity.x + 5, rowTop + 5, {
           width: columns.b_identity.width - 10,
         })
-        doc.text(callDuration, columns.call_duration.x + 5, rowTop + 5, {
-          width: columns.call_duration.width - 10,
+        doc.text(duration, columns.duration.x + 5, rowTop + 5, {
+          width: columns.duration.width - 10,
         })
         doc.text(groupName, columns.group_name.x + 5, rowTop + 5, {
           width: columns.group_name.width - 10,
@@ -377,7 +377,7 @@ export default class ChatsController {
         doc.switchToPage(i)
         doc
           .font('public/fonts/BeVietnamPro-Regular.ttf')
-          .fontSize(8)
+          .fontSize(6)
           .text(`Page ${i + 1} of ${pages.count}`, 50, doc.page.height - 40, { align: 'center' }) // Menempatkan di pojok kanan atas
       }
 
