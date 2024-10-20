@@ -735,9 +735,7 @@ export default class ChatsController {
         .replace(/:/g, '-')
       const wa_name = request.input('wa_owner_name')
       const databaseName = 'wa_forensic_' + wa_name.replace(/\s+/g, '_').toLowerCase()
-      const folderName = `Forensic_${wa_name}_${formatedDate}_${formatedTime}`
-        .replace(/\s+/g, '_')
-        .toUpperCase()
+      const folderName = `Forensic_${wa_name}_${formatedDate}_${formatedTime}`.replace(/\s+/g, '_')
       const waType = request.input('wa_type')
 
       // Validasi input
