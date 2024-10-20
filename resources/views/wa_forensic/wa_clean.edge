@@ -371,30 +371,10 @@ li_1: 'Page'})
                     });
                 },
                 error: function (xhr, status, error) {
-                    let errorMessage = '';
-
-                    try {
-                        const response = xhr.responseJSON;
-
-                        if (response) {
-                            if (response.message === 'E_BAD_CSRF_TOKEN: Invalid CSRF Token') {
-                                errorMessage = 'Sesi telah kadaluarsa. Silakan muat ulang halaman.';
-                            } else {
-                                errorMessage = response.message || response.error;
-                            }
-                        } else if (xhr.status === 419) { //AdonisJS CSRF token mismatch
-                            errorMessage = 'Sesi telah kadaluarsa. Silakan muat ulang halaman.';
-                        } else {
-                            errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
-                        }
-                    } catch (e) {
-                        errorMessage = 'Terjadi kesalahan dalam memproses response dari server.';
-                    }
-
                     Swal.fire({
                         icon: 'error',
                         title: 'Error!',
-                        text: errorMessage,
+                        text: "Terjadi kesalahan. Silakan coba lagi!",
                         confirmButtonColor: '#d33'
                     });
                 },
