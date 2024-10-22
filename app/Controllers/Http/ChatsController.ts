@@ -6,6 +6,7 @@ import PDFDocument from 'pdfkit'
 import { promisify } from 'util'
 import Hash from '@ioc:Adonis/Core/Hash'
 const execAsync = promisify(require('child_process').exec)
+import Ws from 'App/Services/Ws'
 
 export default class ChatsController {
   public async index({ view }: HttpContextContract) {
@@ -715,14 +716,13 @@ export default class ChatsController {
     })
   }
 
-  async run_script_py({ request, response }: HttpContextContract) {
+  public async run_script_py({ request, response }: HttpContextContract) {
     try {
-      // Fungsi untuk mendapatkan format tanggal yang diinginkan
       function formatDate(date) {
         const options = { day: '2-digit', month: 'short', year: 'numeric' }
         return date.toLocaleDateString('en-GB', options)
       }
-      // Mendapatkan waktu lokal
+
       const currentDate = new Date()
       const formatedDate = formatDate(currentDate)
       const formatedTime = currentDate
@@ -738,126 +738,108 @@ export default class ChatsController {
       const folderName = `Forensic_${wa_name}_${formatedDate}_${formatedTime}`.replace(/\s+/g, '_')
       const waType = request.input('wa_type')
 
-      // Validasi input
-      if (!databaseName) {
+      if (!databaseName || !waType) {
         return response.status(422).json({
           status: 'error',
-          message: 'Nama pemilik WhatsApp harus diisi',
-          details: 'Field wa_owner_name adalah wajib',
-        })
-      }
-      if (!waType) {
-        return response.status(422).json({
-          status: 'error',
-          message: 'Tipe WhatsApp harus diisi',
-          details: 'Field wa_type adalah wajib',
+          message: 'Input tidak lengkap!',
+          details: 'Nama pemilik WhatsApp dan tipe WA wajib diisi',
         })
       }
 
-      // Jalankan script Python
+      Ws.io.emit('progress', { percent: 20, message: 'Memulai proses' })
+
+      // Step 1: Jalankan script Python untuk get data forensic
       try {
         const { stdout, stderr } = await execAsync(
-          `python3 resources/python/main.py ${databaseName} ${waType} ${folderName}`
+          `python3 resources/python/get_data_forensic.py ${waType} ${folderName}`
         )
+        if (stderr) throw new Error(stderr)
 
-        if (stderr) {
-          return response.status(500).json({
-            status: 'error',
-            message: 'Terjadi error saat menjalankan script Python',
-            error: stderr,
-            details: 'Lihat log server untuk informasi lebih lanjut',
-          })
-        }
-        // Jalankan script Python untuk membuat table users
-        try {
-          // Jalankan query SQL untuk membuat tabel `users`
-          await Database.rawQuery(`
-        CREATE TABLE IF NOT EXISTS ${databaseName}.users (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          username VARCHAR(255) NOT NULL UNIQUE,
-          email VARCHAR(255) NOT NULL UNIQUE,
-          password VARCHAR(180) NOT NULL,
-          remember_me_token VARCHAR(255),
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        );
-      `)
-
-          const username = 'admin'
-          const email = 'admin@gmail.com'
-          const password = 'Intelijen'
-          const hashedPassword = await Hash.make(password)
-
-          await Database.table(`${databaseName}.users`).insert({
-            username,
-            email,
-            password: hashedPassword,
-          })
-
-          if (stderr) {
-            return response.status(500).json({
-              status: 'error',
-              message: 'Terjadi error saat membuat user',
-              error: stderr,
-              details: 'Lihat log server untuk informasi lebih lanjut',
-            })
-          }
-        } catch (e) {
-          return response.status(500).json({
-            status: 'error',
-            message: 'Terjadi kesalahan saat membuat user',
-            error: e.message,
-          })
-        }
-        const envFilePath = path.join(process.cwd(), '.env')
-        if (!fs.existsSync(envFilePath)) {
-          throw new Error('File .env tidak ditemukan')
-        }
-
-        // Backup .env file terlebih dahulu
-        const envBackupPath = path.join(process.cwd(), '.env.backup')
-        fs.copyFileSync(envFilePath, envBackupPath)
-        try {
-          // Baca dan update konten .env
-          let envContent = fs.readFileSync(envFilePath, 'utf-8')
-          envContent = envContent.replace(
-            /MYSQL_DB_NAME=.*(\r?\n|$)/g,
-            `MYSQL_DB_NAME=${databaseName}$1`
-          )
-          fs.writeFileSync(envFilePath, envContent)
-
-          // Hapus backup file jika semua berhasil
-          fs.unlinkSync(envBackupPath)
-
-          return response.status(200).json({
-            status: 'success',
-            message: `Database ${databaseName} telah berhasil dibuat!`,
-            output: stdout,
-          })
-        } catch (error) {
-          // Jika terjadi error, kembalikan .env ke kondisi semula
-          if (fs.existsSync(envBackupPath)) {
-            fs.copyFileSync(envBackupPath, envFilePath)
-            fs.unlinkSync(envBackupPath)
-          }
-          throw error
-        }
+        Ws.io.emit('progress', { percent: 50, message: 'Get data forensic berhasil', step: 1 })
       } catch (error) {
-        console.error('Server error:', error)
+        Ws.io.emit('progress', { percent: 0, message: 'Get data forensic gagal', step: 1 })
+        return response.status(500).json({ status: 'error', message: error.message })
+      }
+
+      // Step 2: Jalankan script Python untuk convert sqlite ke mysql
+      try {
+        const { stdout, stderr } = await execAsync(
+          `python3 resources/python/main.py ${databaseName}`
+        )
+        if (stderr) throw new Error(stderr)
+
+        Ws.io.emit('progress', {
+          percent: 80,
+          message: 'Convert sqlite to mysql berhasil',
+          step: 2,
+        })
+      } catch (error) {
+        Ws.io.emit('progress', { percent: 0, message: 'Convert sqlite to mysql gagal', step: 2 })
+        return response.status(500).json({ status: 'error', message: error.message })
+      }
+
+      // Step 3: Pembuatan user dalam database
+      try {
+        await Database.rawQuery(`
+          CREATE TABLE IF NOT EXISTS ${databaseName}.users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            username VARCHAR(255) NOT NULL UNIQUE,
+            email VARCHAR(255) NOT NULL UNIQUE,
+            password VARCHAR(180) NOT NULL,
+            remember_me_token VARCHAR(255),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+          );
+        `)
+        const username = 'admin'
+        const email = 'admin@gmail.com'
+        const hashedPassword = await Hash.make('Intelijen')
+
+        await Database.table(`${databaseName}.users`).insert({
+          username,
+          email,
+          password: hashedPassword,
+        })
+        Ws.io.emit('progress', { percent: 90, message: 'Pembuatan user berhasil', step: 3 })
+      } catch (e) {
         return response.status(500).json({
           status: 'error',
-          message: 'Terjadi kesalahan internal server',
-          error: error.message,
-          details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+          message: 'Kesalahan saat membuat user',
+          error: e.message,
         })
       }
+
+      // Step 4: Update .env dengan nama database baru
+      const envFilePath = path.join(process.cwd(), '.env')
+      if (!fs.existsSync(envFilePath)) throw new Error('.env file tidak ditemukan')
+
+      const envBackupPath = path.join(process.cwd(), '.env.backup')
+      fs.copyFileSync(envFilePath, envBackupPath)
+
+      try {
+        let envContent = fs.readFileSync(envFilePath, 'utf-8')
+        envContent = envContent.replace(
+          /MYSQL_DB_NAME=.*(\r?\n|$)/g,
+          `MYSQL_DB_NAME=${databaseName}$1`
+        )
+        fs.writeFileSync(envFilePath, envContent)
+        fs.unlinkSync(envBackupPath)
+
+        Ws.io.emit('progress', { percent: 100, message: 'Update .env berhasil', step: 4 })
+
+        return response.json({
+          status: 'success',
+          message: `Database ${databaseName} telah berhasil dibuat!`,
+        })
+      } catch (error) {
+        fs.copyFileSync(envBackupPath, envFilePath) // Restore .env
+        throw error
+      }
     } catch (error) {
-      console.error('Server error:', error)
+      Ws.io.emit('progress', { percent: 0, message: 'Proses gagal!' })
       return response.status(500).json({
         status: 'error',
-        message: 'Terjadi kesalahan internal server',
-        error: error.message,
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        message: error.message,
       })
     }
   }
