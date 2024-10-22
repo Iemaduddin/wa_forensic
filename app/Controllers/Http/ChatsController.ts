@@ -7,7 +7,7 @@ import { promisify } from 'util'
 import Hash from '@ioc:Adonis/Core/Hash'
 const execAsync = promisify(require('child_process').exec)
 import Ws from 'App/Services/Ws'
-
+import os from 'os'
 export default class ChatsController {
   public async index({ view }: HttpContextContract) {
     let a_identity = null // Inisialisasi dengan null
@@ -827,6 +827,17 @@ export default class ChatsController {
 
         Ws.io.emit('progress', { percent: 100, message: 'Update .env berhasil', step: 4 })
 
+        // Restart server Adonis secara dinamis
+        const platform = os.platform()
+        let command = ''
+
+        if (platform === 'win32') {
+          command = 'taskkill /f /im node.exe && node ace serve --watch'
+        } else {
+          command = 'pkill node && node ace serve --watch'
+        }
+
+        await execAsync(command)
         return response.json({
           status: 'success',
           message: `Database ${databaseName} telah berhasil dibuat!`,

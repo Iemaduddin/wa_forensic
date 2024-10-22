@@ -384,38 +384,68 @@ li_1: 'Page'})
 {{-- Start Sync New DB --}}
 <script>
     $(document).ready(function () {
-        const socket = io()
+        const socket = io();
+
+        // Function untuk mengupdate progress bar secara bertahap
+        function animateProgressBar(targetPercent, step) {
+            const progressBar = $('.progress-bar');
+            let currentPercent = parseFloat(progressBar.attr('aria-valuenow'));
+
+            const interval = setInterval(() => {
+                if (currentPercent < targetPercent) {
+                    currentPercent += 1; // Meningkatkan progress secara bertahap
+                    progressBar.css('width', `${currentPercent}%`).attr('aria-valuenow', currentPercent);
+                    progressBar.text(`${currentPercent}%`);
+                } else {
+                    clearInterval(interval);
+
+                    // Beri tanda cek saat step selesai
+                    if (step === 1 && targetPercent >= 50) {
+                        $('#step1-check').html('<i class="mdi mdi-check-all text-success"></i>');
+                    }
+                    if (step === 2 && targetPercent >= 80) {
+                        $('#step2-check').html('<i class="mdi mdi-check-all text-success"></i>');
+                    }
+                    if (step === 3 && targetPercent >= 90) {
+                        $('#step3-check').html('<i class="mdi mdi-check-all text-success"></i>');
+                    }
+                    if (step === 4 && targetPercent === 100) {
+                        $('#step4-check').html('<i class="mdi mdi-check-all text-success"></i>');
+                        // Tutup modal dan tampilkan notifikasi sukses setelah proses selesai
+                        setTimeout(() => {
+                            $('#modalProgressSyncNewDb').modal('hide');
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: 'Sinkronisasi selesai dengan sukses!',
+                            });
+                        }, 500); // Tambahkan sedikit jeda untuk animasi penutupan modal
+                    }
+                }
+            }, 50); // Mengatur kecepatan animasi
+        }
+
+        // Mendengarkan event progress dari server
         socket.on('progress', function (data) {
-            const { percent, message, step } = data
-            // Update progress bar
-            $('.progress-bar').css('width', `${percent}%`).attr('aria-valuenow', percent)
-            $('.progress-bar').text(`${percent}%`)
+            const { percent, message, step } = data;
 
-            // Update message
-            $('.progress-message').text(message)
+            // Update progress bar secara bertahap
+            animateProgressBar(percent, step);
 
-            // Add checkmark when step completed
-            if (step === 1 && percent >= 50) {
-                $('#step1-check').html('<i class="mdi mdi-check-all text-success"></i>')
-            }
-            if (step === 2 && percent >= 80) {
-                $('#step2-check').html('<i class="mdi mdi-check-all text-success"></i>')
-            }
-            if (step === 3 && percent >= 90) {
-                $('#step3-check').html('<i class="mdi mdi-check-all text-success"></i>')
-            }
-            if (step === 4 && percent === 100) {
-                $('#step4-check').html('<i class="mdi mdi-check-all text-success"></i>')
-            }
-        })
+            // Update message (jika diperlukan)
+            $('.progress-message').text(message);
+        });
+
+        // Event untuk submit form
         $('#syncNewDbForm').on('submit', function (event) {
-            event.preventDefault()
+            event.preventDefault();
             const formData = {
                 wa_owner_name: $('#wa_owner_name').val(),
                 wa_type: $('#wa_type').val(),
                 _csrf: $('meta[name="csrf-token"]').attr('content'),
-            }
+            };
 
+            // Memulai sinkronisasi dengan permintaan AJAX
             $.ajax({
                 url: "{{ route('run_script_py') }}",
                 method: 'POST',
@@ -426,20 +456,21 @@ li_1: 'Page'})
                 success: function (response) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Berhasil!',
+                        title: 'Sinkronisasi dimulai!',
                         text: response.message,
-                    })
+                    });
                 },
                 error: function () {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error!',
                         text: 'Terjadi kesalahan, coba lagi.',
-                    })
+                    });
                 },
-            })
-        })
-    })
+            });
+        });
+    });
 </script>
+
 {{-- End Sync New DB --}}
 @end
