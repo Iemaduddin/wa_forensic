@@ -34,6 +34,10 @@ Route.group(() => {
   )
   // run script python
   Route.post('/chats/wa_clean/run_script_py', 'ChatsController.run_script_py').as('run_script_py')
+  // Restart Server
+  Route.post('/chats/wa_clean/restart_server', 'ChatsController.restart_server').as(
+    'restart_server'
+  )
 
   Route.get('/chats/wa_call_logs', 'ChatsController.call_logs')
   Route.post('/chats/data/call_logs', 'ChatsController.data_call_logs').as('chats.data_call_logs')

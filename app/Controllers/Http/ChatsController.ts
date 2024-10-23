@@ -8,6 +8,8 @@ import Hash from '@ioc:Adonis/Core/Hash'
 const execAsync = promisify(require('child_process').exec)
 import Ws from 'App/Services/Ws'
 import os from 'os'
+const { spawn } = require('child_process')
+
 export default class ChatsController {
   public async index({ view }: HttpContextContract) {
     let a_identity = null // Inisialisasi dengan null
@@ -827,17 +829,6 @@ export default class ChatsController {
 
         Ws.io.emit('progress', { percent: 100, message: 'Update .env berhasil', step: 4 })
 
-        // Restart server Adonis secara dinamis
-        const platform = os.platform()
-        let command = ''
-
-        if (platform === 'win32') {
-          command = 'taskkill /f /im node.exe && node ace serve --watch'
-        } else {
-          command = 'pkill node && node ace serve --watch'
-        }
-
-        await execAsync(command)
         return response.json({
           status: 'success',
           message: `Database ${databaseName} telah berhasil dibuat!`,
@@ -851,6 +842,24 @@ export default class ChatsController {
       return response.status(500).json({
         status: 'error',
         message: error.message,
+      })
+    }
+  }
+  public async restart_server({ response }) {
+    try {
+      const { stdout, stderr } = await execAsync(`python3 resources/python/restart_server.py`)
+      if (stderr) throw new Error(stderr)
+
+      return response.json({
+        status: 'success',
+        message: 'Server berhasil direstart!',
+      })
+    } catch (error) {
+      console.error('Error during server restart:', error)
+      return response.status(500).json({
+        status: 'error',
+        message: 'Gagal merestart server.',
+        details: error.message,
       })
     }
   }

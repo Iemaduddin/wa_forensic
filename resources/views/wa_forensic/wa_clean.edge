@@ -386,12 +386,36 @@ li_1: 'Page'})
     $(document).ready(function () {
         const socket = io();
 
+        // Fungsi untuk mengirim permintaan restart server
+        let isRestarting = false;
+
+        async function restartServer() {
+            if (isRestarting) {
+                console.log('Server is already restarting, please wait...');
+                return;
+            }
+
+            isRestarting = true;
+            try {
+                const response = await $.ajax({
+                    url: "{{ route('restart_server') }}",
+                    type: 'POST',
+                });
+                console.log('Server restarted:', response);
+            } catch (error) {
+                console.error('Error restarting server:', error);
+            } finally {
+                isRestarting = false;
+            }
+        }
+
+
         // Function untuk mengupdate progress bar secara bertahap
         function animateProgressBar(targetPercent, step) {
             const progressBar = $('.progress-bar');
             let currentPercent = parseFloat(progressBar.attr('aria-valuenow'));
 
-            const interval = setInterval(() => {
+            const interval = setInterval(async () => {
                 if (currentPercent < targetPercent) {
                     currentPercent += 1; // Meningkatkan progress secara bertahap
                     progressBar.css('width', `${currentPercent}%`).attr('aria-valuenow', currentPercent);
@@ -411,18 +435,29 @@ li_1: 'Page'})
                     }
                     if (step === 4 && targetPercent === 100) {
                         $('#step4-check').html('<i class="mdi mdi-check-all text-success"></i>');
-                        // Tutup modal dan tampilkan notifikasi sukses setelah proses selesai
-                        setTimeout(() => {
-                            $('#modalProgressSyncNewDb').modal('hide');
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                text: 'Sinkronisasi selesai dengan sukses!',
-                            });
-                        }, 500); // Tambahkan sedikit jeda untuk animasi penutupan modal
+
+
+                        setTimeout(async () => {
+                            await restartServer();
+
+                            // Tutup modal dan tampilkan notifikasi sukses setelah proses selesai
+                            setTimeout(() => {
+                                $('#modalProgressSyncNewDb').modal('hide');
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: 'Sinkronisasi selesai dengan sukses!',
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        $('#syncNewDbForm')[0].reset();
+                                        window.location.href = document.referrer || '/chats/wa_clean';
+                                    }
+                                });
+                            }, 500);
+                        }, 500);
                     }
                 }
-            }, 50); // Mengatur kecepatan animasi
+            }, 20); // Mengatur kecepatan animasi
         }
 
         // Mendengarkan event progress dari server
@@ -454,19 +489,29 @@ li_1: 'Page'})
                 },
                 data: formData,
                 success: function (response) {
+
                     Swal.fire({
-                        icon: 'success',
-                        title: 'Sinkronisasi dimulai!',
-                        text: response.message,
+                        title: 'Proses Sinkronisasi Dimulai',
+                        text: 'Proses sinkronisasi data telah dimulai, mohon tunggu...',
+                        icon: 'info',
+                        progressBar: true,
+                        timer: 5000,
+                        showConfirmButton: false,
                     });
                 },
-                error: function () {
+                error: function (xhr, status, error) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error!',
                         text: 'Terjadi kesalahan, coba lagi.',
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            $('#syncNewDbForm')[0].reset();
+                            window.location.href = document.referrer || '/chats/wa_clean';
+                        }
                     });
                 },
+
             });
         });
     });
